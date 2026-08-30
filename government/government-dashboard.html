@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SOLVIT - Government Analytics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="../style.css" />
+    <style>
+        .gov-section { padding:30px 0 60px; }
+        .gov-header { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:24px; }
+        .gov-header h2 { font-family:'Playfair Display',serif; font-size:2rem; margin-bottom:0; }
+        .gov-header p { color:rgba(255,255,255,0.5); }
+        .gov-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:16px; margin-bottom:30px; }
+        .gov-stat-card { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); border-radius:16px; padding:18px 20px; text-align:center; transition:0.3s; }
+        .gov-stat-card:hover { border-color:rgba(59,130,246,0.2); transform:translateY(-2px); }
+        .gov-stat-card .number { font-size:2rem; font-weight:700; color:#fff; }
+        .gov-stat-card .number.blue { color:#3b82f6; }
+        .gov-stat-card .number.green { color:#10b981; }
+        .gov-stat-card .number.yellow { color:#f59e0b; }
+        .gov-stat-card .number.red { color:#ef4444; }
+        .gov-stat-card .label { font-size:0.85rem; color:rgba(255,255,255,0.5); margin-top:2px; }
+        .gov-grid { display:grid; grid-template-columns:2fr 1fr; gap:24px; }
+        .gov-panel { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:20px; padding:24px 20px; }
+        .gov-panel h3 { font-size:1.1rem; font-weight:600; margin-bottom:16px; }
+        .gov-panel h3 i { color:#3b82f6; margin-right:8px; }
+        .filter-bar { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:20px; align-items:center; }
+        .filter-bar select, .filter-bar input { padding:8px 14px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); border-radius:10px; color:#fff; font-size:0.85rem; font-family:'Inter',sans-serif; min-width:140px; }
+        .filter-bar select:focus, .filter-bar input:focus { outline:none; border-color:#3b82f6; }
+        .filter-bar select option { background:#1a1f2e; color:#fff; }
+        .filter-bar .btn-filter { padding:8px 20px; background:#3b82f6; border:none; border-radius:10px; color:#fff; font-weight:600; cursor:pointer; transition:0.3s; }
+        .filter-bar .btn-filter:hover { background:#1e40af; }
+        .filter-bar .btn-reset { padding:8px 20px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08); border-radius:10px; color:rgba(255,255,255,0.6); font-weight:600; cursor:pointer; transition:0.3s; }
+        .filter-bar .btn-reset:hover { background:rgba(255,255,255,0.12); }
+        .complaint-item { display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.04); flex-wrap:wrap; gap:8px; }
+        .complaint-item:last-child { border-bottom:none; }
+        .complaint-item .info { flex:1; }
+        .complaint-item .info .title { font-weight:500; color:#fff; }
+        .complaint-item .info .meta { font-size:0.8rem; color:rgba(255,255,255,0.4); }
+        .complaint-item .actions { display:flex; gap:6px; flex-wrap:wrap; }
+        .complaint-item .actions button { padding:4px 12px; border:none; border-radius:20px; font-size:0.7rem; font-weight:600; cursor:pointer; transition:0.3s; }
+        .btn-assign { background:rgba(59,130,246,0.15); color:#3b82f6; }
+        .btn-assign:hover { background:#3b82f6; color:#fff; }
+        .btn-progress { background:rgba(139,92,246,0.15); color:#8b5cf6; }
+        .btn-progress:hover { background:#8b5cf6; color:#fff; }
+        .btn-resolve { background:rgba(16,185,129,0.15); color:#10b981; }
+        .btn-resolve:hover { background:#10b981; color:#fff; }
+        .btn-escalate { background:rgba(239,68,68,0.15); color:#ef4444; }
+        .btn-escalate:hover { background:#ef4444; color:#fff; }
+        .btn-view { background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.6); }
+        .btn-view:hover { background:rgba(255,255,255,0.12); }
+        .status-badge { font-size:0.65rem; padding:2px 12px; border-radius:20px; font-weight:600; }
+        .status-badge.submitted { background:rgba(59,130,246,0.15); color:#3b82f6; }
+        .status-badge.assigned { background:rgba(245,158,11,0.15); color:#f59e0b; }
+        .status-badge.progress { background:rgba(139,92,246,0.15); color:#8b5cf6; }
+        .status-badge.resolved { background:rgba(16,185,129,0.15); color:#10b981; }
+        .status-badge.closed { background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.4); }
+        .sla-item { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.03); }
+        .sla-item .sla-id { font-size:0.85rem; color:rgba(255,255,255,0.6); }
+        .sla-item .sla-days { font-weight:600; }
+        .sla-item .sla-days.urgent { color:#ef4444; }
+        .sla-item .sla-days.warning { color:#f59e0b; }
+        .sla-item .sla-days.safe { color:#10b981; }
+        .blockchain-status { background:rgba(16,185,129,0.05); border:1px solid rgba(16,185,129,0.1); border-radius:12px; padding:12px 16px; display:flex; align-items:center; gap:10px; margin-top:12px; }
+        .blockchain-status i { color:#10b981; font-size:1.2rem; }
+        @media (max-width:768px) { .gov-grid { grid-template-columns:1fr; } }
+    </style>
+</head>
+<body>
+    <div id="three-canvas"></div>
+    <div class="app-overlay">
+        <header>
+            <div class="container nav-inner">
+                <a href="gov-index.html" class="logo"><i class="fas fa-gavel"></i><span>SOLVIT</span></a>
+                <div class="nav-links" id="mainNav"></div>
+            </div>
+        </header>
+        <section class="gov-section">
+            <div class="container">
+                <div class="gov-header">
+                    <div>
+                        <h2>📊 Government Analytics</h2>
+                        <p>Monitor civic complaint trends, resolve issues, and track feedback.</p>
+                    </div>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                        <button onclick="window.location.href='gov-services.html'" class="btn-outline" style="padding:8px 20px; border-radius:30px; border:1px solid #3b82f6; background:transparent; color:#3b82f6; cursor:pointer;">Services</button>
+                        <button onclick="window.location.href='gov-index.html'" class="btn-primary" style="padding:8px 20px; border-radius:30px; background:#3b82f6; color:#fff; border:none; cursor:pointer;">Home</button>
+                    </div>
+                </div>
+                <div class="gov-stats" id="govStats">
+                    <div class="gov-stat-card"><div class="number blue" id="totalComplaints">0</div><div class="label">Total Complaints</div></div>
+                    <div class="gov-stat-card"><div class="number red" id="unsolvedComplaints">0</div><div class="label">Unsolved</div></div>
+                    <div class="gov-stat-card"><div class="number yellow" id="progressComplaints">0</div><div class="label">In Progress</div></div>
+                    <div class="gov-stat-card"><div class="number green" id="resolvedComplaints">0</div><div class="label">Resolved</div></div>
+                </div>
+                <div class="gov-grid">
+                    <div class="gov-panel">
+                        <h3><i class="fas fa-list"></i> All Complaints</h3>
+                        <div class="filter-bar">
+                            <select id="filterService">
+                                <option value="all">All Services</option>
+                                <option value="complaint">Complaint Management</option>
+                                <option value="land">Land & Revenue</option>
+                                <option value="rti">RTI</option>
+                                <option value="health">Public Health</option>
+                                <option value="education">Education</option>
+                                <option value="safety">Public Safety</option>
+                                <option value="agriculture">Agriculture</option>
+                                <option value="loan">Loan Waiver</option>
+                                <option value="corruption">Corruption Reporting</option>
+                                <option value="infrastructure">Infrastructure</option>
+                            </select>
+                            <select id="filterDistrict"><option value="all">All Districts</option></select>
+                            <select id="filterStatus">
+                                <option value="all">All Status</option>
+                                <option value="submitted">Submitted</option>
+                                <option value="assigned">Assigned</option>
+                                <option value="progress">In Progress</option>
+                                <option value="resolved">Resolved</option>
+                                <option value="closed">Closed</option>
+                            </select>
+                            <input type="text" id="searchInput" placeholder="🔍 Search..." />
+                            <button class="btn-filter" onclick="applyFilters()"><i class="fas fa-filter"></i> Apply</button>
+                            <button class="btn-reset" onclick="resetFilters()">Reset</button>
+                        </div>
+                        <div id="complaintsList"><p style="color:rgba(255,255,255,0.3); text-align:center; padding:20px;">Loading...</p></div>
+                    </div>
+                    <div>
+                        <div class="gov-panel" style="margin-bottom:20px;">
+                            <h3><i class="fas fa-clock" style="color:#f59e0b;"></i> SLA Monitoring</h3>
+                            <div id="slaList"><p style="color:rgba(255,255,255,0.3); text-align:center; padding:10px;">No SLA data.</p></div>
+                        </div>
+                        <div class="gov-panel">
+                            <h3><i class="fas fa-link" style="color:#10b981;"></i> Blockchain Audit</h3>
+                            <div class="blockchain-status"><i class="fas fa-check-circle"></i><span>All records verified on blockchain</span></div>
+                            <div style="margin-top:8px; font-size:0.85rem; color:rgba(255,255,255,0.4);">Latest Block: <span id="latestBlock">#18,245,678</span></div>
+                            <button onclick="alert('🔗 Blockchain audit trail: All records are immutable and verified.')" style="margin-top:10px; padding:6px 16px; background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.2); border-radius:20px; color:#10b981; cursor:pointer; font-weight:600;">View Audit Trail</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <footer class="footer" style="margin-top:0;">
+            <div class="container">
+                <div class="footer-grid">
+                    <div class="footer-brand"><div class="logo"><i class="fas fa-gavel"></i><span>SOLVIT</span></div><p>Smart Governance. One Platform. For 1.4 Billion.</p><div class="social-links"><a href="#"><i class="fab fa-twitter"></i></a><a href="#"><i class="fab fa-linkedin-in"></i></a><a href="#"><i class="fab fa-github"></i></a><a href="#"><i class="fab fa-youtube"></i></a></div></div>
+                    <div class="footer-links"><h4>Services</h4><a href="gov-services.html">Complaint Management</a><a href="gov-services.html">Petition Portal</a><a href="gov-services.html">Land & Revenue</a></div>
+                    <div class="footer-links"><h4>Company</h4><a href="#">About Us</a><a href="#">Careers</a></div>
+                    <div class="footer-links"><h4>Legal</h4><a href="#">Privacy Policy</a><a href="#">Terms</a></div>
+                </div>
+                <div class="footer-bottom"><p>&copy; 2026 SOLVIT. All rights reserved.</p></div>
+            </div>
+        </footer>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="../script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const API_BASE = 'http://localhost:5000/api';
+
+            const SERVICE_CONFIG = {
+                complaint: { label: 'Complaint Management', endpoint: '/complaints' },
+                land: { label: 'Land & Revenue', endpoint: '/land' },
+                rti: { label: 'RTI', endpoint: '/rti' },
+                health: { label: 'Public Health', endpoint: '/health-reports' },
+                education: { label: 'Education', endpoint: '/education-reports' },
+                safety: { label: 'Public Safety', endpoint: '/safety-complaints' },
+                agriculture: { label: 'Agriculture', endpoint: '/agriculture' },
+                loan: { label: 'Loan Waiver', endpoint: '/loan' },
+                corruption: { label: 'Corruption Reporting', endpoint: '/corruption' },
+                infrastructure: { label: 'Infrastructure', endpoint: '/infrastructure' }
+            };
+
+            let allComplaints = [];
+            let filteredComplaints = [];
+
+            function loadAllComplaints() {
+                let all = [];
+                let completed = 0;
+                const total = Object.keys(SERVICE_CONFIG).length;
+
+                for (const [serviceId, config] of Object.entries(SERVICE_CONFIG)) {
+                    fetch(`${API_BASE}${config.endpoint}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        data.forEach(item => {
+                            let status = (item.status || 'Submitted').toLowerCase();
+                            if (['reported', 'submitted', 'under review', 'under-review', 'underreview'].includes(status)) status = 'submitted';
+                            if (['in progress', 'progress', 'in-progress', 'inprogress', 'processing'].includes(status)) status = 'progress';
+                            if (['completed', 'resolved', 'approved', 'funds released', 'disbursed', 'closed'].includes(status)) status = 'resolved';
+                            if (['assigned'].includes(status)) status = 'assigned';
+
+                            let district = item.district || 'Unknown';
+                            if (!district || district === 'Unknown') {
+                                const loc = item.location || '';
+                                const match = loc.match(/(?:District|Dist|Dt\.?)\s*[:|]\s*([A-Za-z\s]+)/i);
+                                if (match) district = match[1].trim();
+                                else if (loc.includes('Lat:')) district = 'GPS Location';
+                            }
+
+                            all.push({
+                                id: item.id || item.applicationId || item.complaintId || 'N/A',
+                                service: serviceId,
+                                serviceLabel: config.label,
+                                title: item.title || item.schoolName || item.farmerName || item.question || 'Untitled',
+                                description: item.description || item.notes || item.details || '',
+                                citizen: item.userName || item.farmerName || 'Anonymous',
+                                district: district,
+                                status: status,
+                                rawStatus: item.status || 'Submitted',
+                                date: item.createdAt || item.registeredAt || new Date().toISOString(),
+                                raw: item,
+                                userId: item.userId || item.aadhaar || '',
+                                endpoint: config.endpoint
+                            });
+                        });
+                        completed++;
+                        if (completed === total) {
+                            allComplaints = all;
+                            populateDistricts();
+                            applyFilters();
+                            updateSLA();
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error loading from', config.endpoint, err);
+                        completed++;
+                        if (completed === total) {
+                            allComplaints = all;
+                            populateDistricts();
+                            applyFilters();
+                            updateSLA();
+                        }
+                    });
+                }
+            }
+
+            function populateDistricts() {
+                const districts = new Set();
+                allComplaints.forEach(c => {
+                    if (c.district && c.district !== 'Unknown' && c.district !== 'GPS Location') {
+                        districts.add(c.district);
+                    }
+                });
+                const select = document.getElementById('filterDistrict');
+                const currentVal = select.value;
+                select.innerHTML = '<option value="all">All Districts</option>';
+                [...districts].sort().forEach(d => {
+                    select.innerHTML += `<option value="${d}">${d}</option>`;
+                });
+                if ([...districts].includes(currentVal)) select.value = currentVal;
+            }
+
+            function applyFilters() {
+                const serviceFilter = document.getElementById('filterService').value;
+                const districtFilter = document.getElementById('filterDistrict').value;
+                const statusFilter = document.getElementById('filterStatus').value;
+                const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+
+                filteredComplaints = allComplaints.filter(c => {
+                    const matchService = serviceFilter === 'all' || c.service === serviceFilter;
+                    const matchDistrict = districtFilter === 'all' || c.district === districtFilter;
+                    const matchStatus = statusFilter === 'all' || c.status === statusFilter;
+                    const matchSearch = c.title.toLowerCase().includes(searchTerm) ||
+                                        c.citizen.toLowerCase().includes(searchTerm) ||
+                                        c.id.toLowerCase().includes(searchTerm) ||
+                                        c.serviceLabel.toLowerCase().includes(searchTerm);
+                    return matchService && matchDistrict && matchStatus && matchSearch;
+                });
+                updateStats();
+                renderTable();
+            }
+
+            function updateStats() {
+                const total = filteredComplaints.length;
+                const unsolved = filteredComplaints.filter(c => c.status === 'submitted' || c.status === 'assigned').length;
+                const progress = filteredComplaints.filter(c => c.status === 'progress').length;
+                const resolved = filteredComplaints.filter(c => c.status === 'resolved').length;
+                document.getElementById('totalComplaints').textContent = total;
+                document.getElementById('unsolvedComplaints').textContent = unsolved;
+                document.getElementById('progressComplaints').textContent = progress;
+                document.getElementById('resolvedComplaints').textContent = resolved;
+            }
+
+            function renderTable() {
+                const tbody = document.getElementById('complaintsList');
+                if (filteredComplaints.length === 0) {
+                    tbody.innerHTML = `<p style="color:rgba(255,255,255,0.3); text-align:center; padding:20px;">No complaints match your filters.</p>`;
+                    return;
+                }
+                let html = '';
+                filteredComplaints.forEach(c => {
+                    const statusClass = c.status;
+                    const dateObj = new Date(c.date);
+                    const dateStr = dateObj.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+                    html += `
+                        <div class="complaint-item">
+                            <div class="info">
+                                <div class="title">${c.title}</div>
+                                <div class="meta">
+                                    <span class="status-badge ${statusClass}">${c.rawStatus}</span>
+                                    · ${c.serviceLabel} · ${c.district} · ${c.citizen}
+                                </div>
+                            </div>
+                            <div class="actions">
+                                <button class="btn-view" data-id="${c.id}" data-service="${c.service}"><i class="fas fa-eye"></i></button>
+                                ${c.status === 'submitted' || c.status === 'assigned' ? `<button class="btn-progress" data-id="${c.id}" data-service="${c.service}"><i class="fas fa-play"></i></button>` : ''}
+                                ${c.status === 'progress' ? `<button class="btn-resolve" data-id="${c.id}" data-service="${c.service}"><i class="fas fa-check"></i></button>` : ''}
+                                <button class="btn-escalate" data-id="${c.id}"><i class="fas fa-exclamation"></i></button>
+                            </div>
+                        </div>
+                    `;
+                });
+                tbody.innerHTML = html;
+                attachEvents();
+            }
+
+            function attachEvents() {
+                document.querySelectorAll('.btn-view').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const id = this.dataset.id;
+                        const c = filteredComplaints.find(x => x.id === id);
+                        if (c) alert(`📋 Complaint: ${c.id}\nTitle: ${c.title}\nStatus: ${c.rawStatus}\nCitizen: ${c.citizen}\nService: ${c.serviceLabel}\nDistrict: ${c.district}`);
+                    });
+                });
+
+                document.querySelectorAll('.btn-progress').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const id = this.dataset.id;
+                        const service = this.dataset.service;
+                        const config = SERVICE_CONFIG[service];
+                        if (!config) return;
+                        const endpoint = config.endpoint;
+                        fetch(`${API_BASE}${endpoint}`)
+                        .then(res => res.json())
+                        .then(items => {
+                            const item = items.find(x => x.id === id);
+                            if (!item) return;
+                            item.status = 'In Progress';
+                            if (!item.timeline) item.timeline = [];
+                            item.timeline.push({
+                                status: 'In Progress',
+                                date: new Date().toISOString(),
+                                remark: 'Application is now in progress by the department.'
+                            });
+                            return fetch(`${API_BASE}${endpoint}/${id}`, {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(item)
+                            });
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success || data) {
+                                alert('✅ Status updated to In Progress');
+                                loadAllComplaints();
+                            } else {
+                                alert('Update failed.');
+                            }
+                        })
+                        .catch(err => console.error('Update error:', err));
+                    });
+                });
+
+                document.querySelectorAll('.btn-resolve').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const id = this.dataset.id;
+                        const service = this.dataset.service;
+                        const config = SERVICE_CONFIG[service];
+                        if (!config) return;
+                        const endpoint = config.endpoint;
+                        fetch(`${API_BASE}${endpoint}`)
+                        .then(res => res.json())
+                        .then(items => {
+                            const item = items.find(x => x.id === id);
+                            if (!item) return;
+                            item.status = 'Resolved';
+                            if (!item.timeline) item.timeline = [];
+                            item.timeline.push({
+                                status: 'Resolved',
+                                date: new Date().toISOString(),
+                                remark: 'Application has been resolved successfully.'
+                            });
+                            return fetch(`${API_BASE}${endpoint}/${id}`, {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(item)
+                            });
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success || data) {
+                                alert('✅ Status updated to Resolved');
+                                loadAllComplaints();
+                            } else {
+                                alert('Update failed.');
+                            }
+                        })
+                        .catch(err => console.error('Update error:', err));
+                    });
+                });
+
+                document.querySelectorAll('.btn-escalate').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        alert('🚨 Complaint escalated to higher authority.');
+                    });
+                });
+            }
+
+            function resetFilters() {
+                document.getElementById('filterService').value = 'all';
+                document.getElementById('filterDistrict').value = 'all';
+                document.getElementById('filterStatus').value = 'all';
+                document.getElementById('searchInput').value = '';
+                applyFilters();
+            }
+
+            function updateSLA() {
+                const container = document.getElementById('slaList');
+                const slaData = allComplaints.slice(0,5).map(c => ({ id: c.id, days: Math.floor(Math.random()*10)+1, status: Math.random()>0.7?'urgent':Math.random()>0.5?'warning':'safe' }));
+                if (slaData.length === 0) { container.innerHTML = `<p style="color:rgba(255,255,255,0.3); text-align:center; padding:10px;">No SLA data.</p>`; return; }
+                let html = '';
+                slaData.forEach(s => { const cls = s.status; html += `<div class="sla-item"><span class="sla-id">${s.id}</span><span class="sla-days ${cls}">${s.days} days</span></div>`; });
+                container.innerHTML = html;
+            }
+
+            window.applyFilters = applyFilters;
+            window.resetFilters = resetFilters;
+
+            loadAllComplaints();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SOLVIT - Register</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="style.css" />
+
+    <style>
+        .auth-section {
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+        .auth-card {
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 28px;
+            padding: 48px 40px;
+            max-width: 480px;
+            width: 100%;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+            transition: 0.3s;
+        }
+        .auth-card:hover {
+            border-color: rgba(59, 130, 246, 0.2);
+        }
+        .auth-card .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #fff;
+            text-decoration: none;
+            margin-bottom: 8px;
+        }
+        .auth-card .logo i {
+            color: #f59e0b;
+            font-size: 1.8rem;
+        }
+        .auth-card .logo span {
+            background: linear-gradient(135deg, #fff 40%, #f59e0b);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .auth-card h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 6px;
+            color: #fff;
+        }
+        .auth-card .subtitle {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.95rem;
+            margin-bottom: 28px;
+        }
+        .auth-card .subtitle i {
+            margin-right: 6px;
+            color: #f59e0b;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 4px;
+        }
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 11px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 0.95rem;
+            transition: 0.3s;
+            font-family: 'Inter', sans-serif;
+        }
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+        }
+        .form-group select option {
+            background: #1a1f2e;
+            color: #fff;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+        .auth-card .btn-primary {
+            width: 100%;
+            padding: 14px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 6px;
+        }
+        .auth-card .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+        }
+        .auth-footer {
+            text-align: center;
+            margin-top: 20px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+        }
+        .auth-footer a {
+            color: #3b82f6;
+            font-weight: 600;
+            transition: 0.3s;
+            text-decoration: none;
+        }
+        .auth-footer a:hover {
+            color: #8b5cf6;
+        }
+        .role-selector {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .role-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.5);
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+        .role-btn.active {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.12);
+            color: #fff;
+        }
+        .role-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .alert {
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+            display: none;
+        }
+        .alert.error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #f87171;
+            display: block;
+        }
+        .alert.success {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: #34d399;
+            display: block;
+        }
+        @media (max-width: 480px) {
+            .auth-card { padding: 32px 20px; }
+            .role-selector { flex-direction: column; }
+            .form-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="three-canvas"></div>
+
+    <div class="app-overlay">
+        <header>
+            <div class="container nav-inner">
+                <a href="citizen/index.html" class="logo">
+                    <i class="fas fa-gavel"></i>
+                    <span>SOLVIT</span>
+                </a>
+                <div class="nav-links" id="mainNav"></div>
+            </div>
+        </header>
+
+        <!-- REGISTER FORM -->
+        <section class="auth-section">
+            <div class="auth-card">
+                <div class="logo">
+                    <i class="fas fa-gavel"></i>
+                    <span>SOLVIT</span>
+                </div>
+                <h2>Create Account</h2>
+                <p class="subtitle"><i class="fas fa-user-plus"></i> Join India's smart governance platform</p>
+
+                <div id="registerAlert" class="alert"></div>
+
+                <div class="role-selector">
+                    <button class="role-btn active" data-role="citizen">👤 Citizen</button>
+                    <button class="role-btn" data-role="government">🏛️ Government</button>
+                </div>
+
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label for="fullName">Full Name <span class="required-star">*</span></label>
+                        <input type="text" id="fullName" placeholder="Enter your full name" required />
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="email">Email <span class="required-star">*</span></label>
+                            <input type="email" id="email" placeholder="your@email.com" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="mobile">Mobile <span class="required-star">*</span></label>
+                            <input type="tel" id="mobile" placeholder="9876543210" required />
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="password">Password <span class="required-star">*</span></label>
+                            <input type="password" id="password" placeholder="Min 6 characters" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmPassword">Confirm <span class="required-star">*</span></label>
+                            <input type="password" id="confirmPassword" placeholder="Re-enter" required />
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="state">State</label>
+                            <select id="state">
+                                <option value="Tamil Nadu">Tamil Nadu</option>
+                                <option value="Maharashtra">Maharashtra</option>
+                                <option value="Uttar Pradesh">Uttar Pradesh</option>
+                                <option value="Karnataka">Karnataka</option>
+                                <option value="Gujarat">Gujarat</option>
+                                <option value="Rajasthan">Rajasthan</option>
+                                <option value="Delhi">Delhi</option>
+                                <option value="Kerala">Kerala</option>
+                                <option value="West Bengal">West Bengal</option>
+                                <option value="Andhra Pradesh">Andhra Pradesh</option>
+                                <option value="Telangana">Telangana</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="district">District</label>
+                            <input type="text" id="district" placeholder="Enter your district" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="language">Preferred Language</label>
+                        <select id="language">
+                            <option value="English">English</option>
+                            <option value="Hindi">Hindi</option>
+                            <option value="Tamil">Tamil</option>
+                            <option value="Telugu">Telugu</option>
+                            <option value="Kannada">Kannada</option>
+                            <option value="Malayalam">Malayalam</option>
+                            <option value="Marathi">Marathi</option>
+                            <option value="Gujarati">Gujarati</option>
+                            <option value="Bengali">Bengali</option>
+                            <option value="Punjabi">Punjabi</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn-primary">✅ Register Now</button>
+                </form>
+
+                <div class="auth-footer">
+                    Already have an account? <a href="login.html">Login here</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="footer" style="margin-top: 0;">
+            <div class="container">
+                <div class="footer-grid">
+                    <div class="footer-brand">
+                        <div class="logo"><i class="fas fa-gavel"></i><span>SOLVIT</span></div>
+                        <p>Smart Governance. One Platform. For 1.4 Billion.</p>
+                        <div class="social-links">
+                            <a href="#"><i class="fab fa-twitter"></i></a>
+                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#"><i class="fab fa-github"></i></a>
+                            <a href="#"><i class="fab fa-youtube"></i></a>
+                        </div>
+                    </div>
+                    <div class="footer-links">
+                        <h4>Services</h4>
+                        <a href="citizen/services.html">Complaint Management</a>
+                        <a href="citizen/services.html">Petition Portal</a>
+                        <a href="citizen/services.html">Land & Revenue</a>
+                    </div>
+                    <div class="footer-links">
+                        <h4>Company</h4>
+                        <a href="#">About Us</a>
+                        <a href="#">Careers</a>
+                    </div>
+                    <div class="footer-links">
+                        <h4>Legal</h4>
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Terms</a>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; 2026 SOLVIT. All rights reserved. Made with ❤️ for India.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="script.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const registerForm = document.getElementById('registerForm');
+            const registerAlert = document.getElementById('registerAlert');
+            const roleBtns = document.querySelectorAll('.role-btn');
+            let selectedRole = 'citizen';
+
+            roleBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    roleBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    selectedRole = this.dataset.role;
+                });
+            });
+
+            registerForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const fullName = document.getElementById('fullName').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const mobile = document.getElementById('mobile').value.trim();
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                const state = document.getElementById('state').value;
+                const district = document.getElementById('district').value.trim();
+                const language = document.getElementById('language').value;
+
+                if (!fullName || !email || !mobile || !password || !confirmPassword) {
+                    showAlert('Please fill in all required fields.', 'error');
+                    return;
+                }
+                if (password.length < 6) {
+                    showAlert('Password must be at least 6 characters.', 'error');
+                    return;
+                }
+                if (password !== confirmPassword) {
+                    showAlert('Passwords do not match.', 'error');
+                    return;
+                }
+                if (mobile.length < 10) {
+                    showAlert('Please enter a valid 10-digit mobile number.', 'error');
+                    return;
+                }
+
+                // ─── CALL BACKEND API ───
+                fetch('http://localhost:5000/api/users/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id: 'USR-' + Date.now(),
+                        fullName,
+                        email,
+                        mobile,
+                        password,
+                        role: selectedRole,
+                        state,
+                        district: district || 'Not specified',
+                        language,
+                        registeredAt: new Date().toISOString()
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert('✅ Registration successful! Redirecting to login...', 'success');
+                        setTimeout(() => {
+                            window.location.href = 'login.html';
+                        }, 1500);
+                    } else {
+                        showAlert(data.error || 'Registration failed. Please try again.', 'error');
+                    }
+                })
+                .catch(err => {
+                    console.error('Registration error:', err);
+                    showAlert('Network error. Please try again.', 'error');
+                });
+            });
+
+            function showAlert(message, type) {
+                registerAlert.textContent = message;
+                registerAlert.className = 'alert ' + type;
+                setTimeout(() => {
+                    registerAlert.className = 'alert';
+                }, 5000);
+            }
+        });
+    </script>
+
+</body>
+</html>

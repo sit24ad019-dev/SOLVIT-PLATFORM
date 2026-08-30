@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SOLVIT - Create Petition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+    <div id="three-canvas"></div>
+    <div class="app-overlay">
+        <header>
+            <div class="container nav-inner">
+                <a href="index.html" class="logo"><i class="fas fa-gavel"></i><span>SOLVIT</span></a>
+                <div class="nav-links" id="mainNav"></div>
+            </div>
+        </header>
+        <section class="form-section">
+            <div class="container">
+                <div class="form-card">
+                    <h2>📋 Create a Petition</h2>
+                    <p class="subtitle">Start a public petition and gather support for change.</p>
+                    <div id="formAlert" class="alert"></div>
+                    <form id="petitionForm">
+                        <div class="form-group">
+                            <label for="petitionTitle">Petition Title <span class="required-star">*</span></label>
+                            <input type="text" id="petitionTitle" placeholder="Brief title" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="petitionDescription">Description <span class="required-star">*</span></label>
+                            <textarea id="petitionDescription" placeholder="What change do you want to see?" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="petitionCategory">Category <span class="required-star">*</span></label>
+                            <select id="petitionCategory" required>
+                                <option value="Infrastructure">Infrastructure</option>
+                                <option value="Education">Education</option>
+                                <option value="Health">Health</option>
+                                <option value="Environment">Environment</option>
+                                <option value="Social Justice">Social Justice</option>
+                                <option value="Transport">Transport</option>
+                                <option value="Water Supply">Water Supply</option>
+                                <option value="Electricity">Electricity</option>
+                                <option value="Others">Others</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="petitionDistrict">District <span class="required-star">*</span></label>
+                                <input type="text" id="petitionDistrict" placeholder="Enter your district" required />
+                            </div>
+                            <div class="form-group">
+                                <label for="petitionState">State <span class="required-star">*</span></label>
+                                <select id="petitionState" required>
+                                    <option value="Tamil Nadu">Tamil Nadu</option>
+                                    <option value="Maharashtra">Maharashtra</option>
+                                    <option value="Uttar Pradesh">Uttar Pradesh</option>
+                                    <option value="Karnataka">Karnataka</option>
+                                    <option value="Gujarat">Gujarat</option>
+                                    <option value="Rajasthan">Rajasthan</option>
+                                    <option value="Delhi">Delhi</option>
+                                    <option value="Kerala">Kerala</option>
+                                    <option value="West Bengal">West Bengal</option>
+                                    <option value="Andhra Pradesh">Andhra Pradesh</option>
+                                    <option value="Telangana">Telangana</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="petitionLocation">Location (GPS / Manual) <span class="required-star">*</span></label>
+                            <div class="location-wrapper">
+                                <input type="text" id="petitionLocation" placeholder="Click 'Get Location' or type manually" required />
+                                <button type="button" id="getLocationBtn" class="get-location-btn"><i class="fas fa-location-dot"></i> Get Location</button>
+                            </div>
+                            <div class="hint">Capture GPS location or enter address manually.</div>
+                            <input type="hidden" id="latitude" />
+                            <input type="hidden" id="longitude" />
+                        </div>
+                        <div class="form-group">
+                            <label for="proofImage">Image Proof <span class="required-star">*</span></label>
+                            <label for="proofImage" class="file-upload-btn"><i class="fas fa-image"></i> Choose Image File</label>
+                            <input type="file" id="proofImage" accept="image/*" style="display:none;" required />
+                            <span id="imageFileName" style="color:rgba(255,255,255,0.5); font-size:0.85rem; margin-left:10px;">No file chosen</span>
+                            <div class="hint">Upload an image (JPG, PNG, GIF)</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="proofVideo">Video Proof <span class="required-star">*</span></label>
+                            <label for="proofVideo" class="file-upload-btn"><i class="fas fa-video"></i> Choose Video File</label>
+                            <input type="file" id="proofVideo" accept="video/*" style="display:none;" required />
+                            <span id="videoFileName" style="color:rgba(255,255,255,0.5); font-size:0.85rem; margin-left:10px;">No file chosen</span>
+                            <div class="hint">Upload a video (MP4, WebM)</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="petitionLetter">Petition Letter Copy <span class="required-star">*</span></label>
+                            <label for="petitionLetter" class="file-upload-btn"><i class="fas fa-file-pdf"></i> Choose File</label>
+                            <input type="file" id="petitionLetter" accept="image/*,.pdf" style="display:none;" required />
+                            <span id="letterFileName" style="color:rgba(255,255,255,0.5); font-size:0.85rem; margin-left:10px;">No file chosen</span>
+                            <div class="hint">Upload a scanned/photo copy of the signed letter (PDF or image)</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="additionalNotes">Additional Notes (optional)</label>
+                            <textarea id="additionalNotes" placeholder="Any extra information about your petition..." rows="3"></textarea>
+                        </div>
+                        <button type="submit" class="btn-submit">✍️ Create Petition</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+        <footer class="footer" style="margin-top:0;">
+            <div class="container">
+                <div class="footer-grid">
+                    <div class="footer-brand"><div class="logo"><i class="fas fa-gavel"></i><span>SOLVIT</span></div><p>Smart Governance. One Platform. For 1.4 Billion.</p><div class="social-links"><a href="#"><i class="fab fa-twitter"></i></a><a href="#"><i class="fab fa-linkedin-in"></i></a><a href="#"><i class="fab fa-github"></i></a><a href="#"><i class="fab fa-youtube"></i></a></div></div>
+                    <div class="footer-links"><h4>Services</h4><a href="services.html">Complaint Management</a><a href="services.html">Petition Portal</a><a href="services.html">Land & Revenue</a></div>
+                    <div class="footer-links"><h4>Company</h4><a href="#">About Us</a><a href="#">Careers</a></div>
+                    <div class="footer-links"><h4>Legal</h4><a href="#">Privacy Policy</a><a href="#">Terms</a></div>
+                </div>
+                <div class="footer-bottom"><p>&copy; 2026 SOLVIT. All rights reserved.</p></div>
+            </div>
+        </footer>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="../script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const session = JSON.parse(localStorage.getItem('solvit_session'));
+            if (session && session.id) {
+                const users = JSON.parse(localStorage.getItem('solvit_users')) || [];
+                const user = users.find(u => u.id === session.id);
+                if (user) {
+                    document.getElementById('petitionState').value = user.state || 'Tamil Nadu';
+                    document.getElementById('petitionDistrict').value = user.district || '';
+                }
+            }
+            showFileName('proofImage', 'imageFileName');
+            showFileName('proofVideo', 'videoFileName');
+            showFileName('petitionLetter', 'letterFileName');
+            getCurrentLocation('getLocationBtn', 'petitionLocation', 'latitude', 'longitude');
+
+            document.getElementById('petitionForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const session = JSON.parse(localStorage.getItem('solvit_session'));
+                if (!session || !session.id) { showAlert('Please login to create a petition.', 'error'); return; }
+
+                const title = document.getElementById('petitionTitle').value.trim();
+                const description = document.getElementById('petitionDescription').value.trim();
+                const category = document.getElementById('petitionCategory').value;
+                const district = document.getElementById('petitionDistrict').value.trim();
+                const state = document.getElementById('petitionState').value;
+                const location = document.getElementById('petitionLocation').value.trim();
+                const additionalNotes = document.getElementById('additionalNotes').value.trim();
+                const lat = document.getElementById('latitude').value;
+                const lng = document.getElementById('longitude').value;
+                const proofImage = document.getElementById('proofImage').files[0];
+                const proofVideo = document.getElementById('proofVideo').files[0];
+                const petitionLetter = document.getElementById('petitionLetter').files[0];
+
+                if (!title || !description || !district || !state || !location) { showAlert('Please fill in all required fields.', 'error'); return; }
+                if (!lat || !lng) { showAlert('Please capture your GPS location.', 'error'); return; }
+                if (!petitionLetter) { showAlert('Please upload the petition letter copy (mandatory).', 'error'); return; }
+                if (!proofImage) { showAlert('Please upload an Image proof (mandatory).', 'error'); return; }
+                if (!proofVideo) { showAlert('Please upload a Video proof (mandatory).', 'error'); return; }
+
+                const petitionData = {
+                    id: 'PET-' + Date.now(),
+                    title, description, category, district, state, location,
+                    latitude: lat, longitude: lng,
+                    additionalNotes: additionalNotes || '',
+                    proofImage: proofImage.name,
+                    proofVideo: proofVideo.name,
+                    petitionLetter: petitionLetter.name,
+                    currentSignatures: 0,
+                    status: 'Active',
+                    createdAt: new Date().toISOString(),
+                    userId: session.id,
+                    userName: session.name,
+                    timeline: [{ status: 'Created', date: new Date().toISOString(), remark: 'Petition created successfully.' }]
+                };
+
+                fetch('http://localhost:5000/api/petitions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(petitionData)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert('✅ Petition created successfully! Redirecting to Dashboard...', 'success');
+                        document.getElementById('petitionForm').reset();
+                        document.getElementById('imageFileName').textContent = 'No file chosen';
+                        document.getElementById('videoFileName').textContent = 'No file chosen';
+                        document.getElementById('letterFileName').textContent = 'No file chosen';
+                        document.getElementById('latitude').value = '';
+                        document.getElementById('longitude').value = '';
+                        setTimeout(() => window.location.href = 'dashboard.html', 1500);
+                    } else {
+                        showAlert('Submission failed: ' + (data.error || 'Unknown error'), 'error');
+                    }
+                })
+                .catch(err => { console.error('Error:', err); showAlert('Network error. Please try again.', 'error'); });
+            });
+
+            function showAlert(msg, type) {
+                const alertDiv = document.getElementById('formAlert');
+                alertDiv.textContent = msg;
+                alertDiv.className = 'alert ' + type;
+                setTimeout(() => alertDiv.className = 'alert', 5000);
+            }
+        });
+    </script>
+</body>
+</html>

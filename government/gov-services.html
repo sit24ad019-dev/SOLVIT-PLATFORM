@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SOLVIT - Government Services</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="../style.css" />
+
+    <style>
+        .gov-services-section {
+            padding: 40px 0 60px;
+        }
+
+        .gov-services-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .gov-services-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.4rem;
+            margin-bottom: 8px;
+        }
+
+        .gov-services-header p {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 1.05rem;
+        }
+
+        .gov-services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 28px;
+            padding: 10px 0;
+        }
+
+        .gov-service-card {
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
+            padding: 28px 20px 24px;
+            text-align: center;
+            transition: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gov-service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.06), transparent 70%);
+            opacity: 0;
+            transition: 0.4s;
+        }
+
+        .gov-service-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: rgba(59, 130, 246, 0.25);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .gov-service-card:hover::before {
+            opacity: 1;
+        }
+
+        .gov-service-card .card-icon {
+            font-size: 2.4rem;
+            color: #3b82f6;
+            margin-bottom: 14px;
+            display: inline-block;
+            background: rgba(59, 130, 246, 0.1);
+            padding: 12px;
+            border-radius: 16px;
+            transition: 0.3s;
+        }
+
+        .gov-service-card:hover .card-icon {
+            background: rgba(59, 130, 246, 0.2);
+            transform: scale(1.08);
+        }
+
+        .gov-service-card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #fff;
+        }
+
+        .gov-service-card p {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+            line-height: 1.5;
+            margin-bottom: 14px;
+        }
+
+        .gov-service-card .card-tag {
+            display: inline-block;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            background: rgba(59, 130, 246, 0.12);
+            padding: 3px 12px;
+            border-radius: 20px;
+            color: #3b82f6;
+            border: 1px solid rgba(59, 130, 246, 0.15);
+        }
+
+        /* Color variations for icons */
+        .gov-service-card:nth-child(2) .card-icon { color: #8b5cf6; }
+        .gov-service-card:nth-child(3) .card-icon { color: #f59e0b; }
+        .gov-service-card:nth-child(4) .card-icon { color: #10b981; }
+        .gov-service-card:nth-child(5) .card-icon { color: #f472b6; }
+        .gov-service-card:nth-child(6) .card-icon { color: #06b6d4; }
+        .gov-service-card:nth-child(7) .card-icon { color: #84cc16; }
+        .gov-service-card:nth-child(8) .card-icon { color: #f97316; }
+
+        @media (max-width: 768px) {
+            .gov-services-grid {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .gov-services-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 14px;
+            }
+            .gov-service-card {
+                padding: 18px 14px 16px;
+            }
+            .gov-service-card .card-icon {
+                font-size: 1.8rem;
+                padding: 8px;
+            }
+            .gov-service-card h3 {
+                font-size: 0.95rem;
+            }
+            .gov-service-card p {
+                font-size: 0.75rem;
+            }
+            .gov-services-header h2 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="three-canvas"></div>
+
+    <div class="app-overlay">
+        <!-- HEADER -->
+        <header>
+            <div class="container nav-inner">
+                <a href="gov-index.html" class="logo">
+                    <i class="fas fa-gavel"></i>
+                    <span>SOLVIT</span>
+                </a>
+                <div class="nav-links" id="mainNav"></div>
+            </div>
+        </header>
+
+        <!-- GOVERNMENT SERVICES -->
+        <section class="gov-services-section">
+            <div class="container">
+                <div class="gov-services-header">
+                    <h2>🏛️ Government Services</h2>
+                    <p>Click a service to view and manage complaints submitted by citizens.</p>
+                </div>
+
+                <div class="gov-services-grid" id="govServicesGrid">
+                    <!-- Cards will be injected by JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="footer" style="margin-top: 0;">
+            <div class="container">
+                <div class="footer-grid">
+                    <div class="footer-brand">
+                        <div class="logo"><i class="fas fa-gavel"></i><span>SOLVIT</span></div>
+                        <p>Smart Governance. One Platform. For 1.4 Billion.</p>
+                        <div class="social-links">
+                            <a href="#"><i class="fab fa-twitter"></i></a>
+                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#"><i class="fab fa-github"></i></a>
+                            <a href="#"><i class="fab fa-youtube"></i></a>
+                        </div>
+                    </div>
+                    <div class="footer-links">
+                        <h4>Services</h4>
+                        <a href="gov-services.html">Complaint Management</a>
+                        <a href="gov-services.html">Petition Portal</a>
+                        <a href="gov-services.html">Land & Revenue</a>
+                    </div>
+                    <div class="footer-links">
+                        <h4>Company</h4>
+                        <a href="#">About Us</a>
+                        <a href="#">Careers</a>
+                        <a href="#">Contact</a>
+                    </div>
+                    <div class="footer-links">
+                        <h4>Legal</h4>
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Terms of Service</a>
+                        <a href="#">Cookie Policy</a>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; 2026 SOLVIT. All rights reserved. Made with ❤️ for India.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="../script.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // ─── GOVERNMENT SERVICE CARDS ───
+            const govServices = [
+                { id: 'complaint', label: 'Complaint Management', icon: 'fa-file-signature', desc: 'View citizen complaints and update status.', tag: 'Manage' },
+                { id: 'land', label: 'Land & Revenue', icon: 'fa-map-marked-alt', desc: 'Manage land-related complaints.', tag: 'Manage' },
+                { id: 'rti', label: 'RTI Requests', icon: 'fa-info-circle', desc: 'Handle RTI applications.', tag: 'Manage' },
+                { id: 'health', label: 'Public Health', icon: 'fa-heartbeat', desc: 'Review health-related reports.', tag: 'Manage' },
+                { id: 'education', label: 'Education Services', icon: 'fa-graduation-cap', desc: 'Manage school issues.', tag: 'Manage' },
+                { id: 'safety', label: 'Public Safety', icon: 'fa-shield-alt', desc: 'Monitor police complaints.', tag: 'Manage' },
+                { id: 'agriculture', label: 'Rural & Agriculture', icon: 'fa-tractor', desc: 'Support farmer applications.', tag: 'Manage' },
+                { id: 'loan', label: 'Loan Waiver', icon: 'fa-hand-holding-usd', desc: 'Process loan waiver requests.', tag: 'Manage' }
+            ];
+
+            const container = document.getElementById('govServicesGrid');
+
+            govServices.forEach(s => {
+                const card = document.createElement('div');
+                card.className = 'gov-service-card';
+                card.setAttribute('onclick', `window.location.href='government-dashboard.html?service=${s.id}'`);
+
+                card.innerHTML = `
+                    <div class="card-icon"><i class="fas ${s.icon}"></i></div>
+                    <h3>${s.label}</h3>
+                    <p>${s.desc}</p>
+                    <span class="card-tag">${s.tag}</span>
+                `;
+
+                container.appendChild(card);
+            });
+        });
+    </script>
+
+</body>
+</html>

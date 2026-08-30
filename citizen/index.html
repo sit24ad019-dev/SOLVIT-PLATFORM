@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SOLVIT - Citizen Home</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="../style.css" />
+    <style>
+        .hero-section { padding: 60px 0 40px; text-align: center; }
+        .hero-section .badge { display: inline-block; background: rgba(255,153,51,0.15); border: 1px solid rgba(255,153,51,0.25); padding: 6px 18px; border-radius: 40px; font-size: 0.8rem; font-weight: 600; color: #ff9933; margin-bottom: 24px; }
+        .hero-section h1 { font-family: 'Playfair Display', serif; font-size: clamp(2.8rem, 8vw, 5.2rem); font-weight: 800; line-height: 1.1; max-width: 900px; margin: 0 auto 20px; }
+        .hero-section h1 .highlight-gold { background: linear-gradient(135deg, #f59e0b, #ff9933); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero-section h1 .highlight-blue { background: linear-gradient(135deg, #3b82f6, #8b5cf6); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero-section p { font-size: 1.15rem; max-width: 680px; color: rgba(255,255,255,0.7); margin: 0 auto 36px; line-height: 1.7; }
+        .hero-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; }
+        .stats-section { padding: 40px 0; border-top: 1px solid rgba(255,255,255,0.04); border-bottom: 1px solid rgba(255,255,255,0.04); margin: 20px 0; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 20px; text-align: center; }
+        .stat-number { font-size: 2.8rem; font-weight: 800; font-family: 'Playfair Display', serif; background: linear-gradient(135deg, #fff 30%, #3b82f6); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; line-height: 1.2; }
+        .stat-label { color: rgba(255,255,255,0.5); font-size: 0.95rem; }
+        .stat-number .counter { display: inline-block; min-width: 40px; }
+    </style>
+</head>
+<body>
+    <div id="three-canvas"></div>
+    <div class="app-overlay">
+        <header>
+            <div class="container nav-inner">
+                <a href="index.html" class="logo"><i class="fas fa-gavel"></i><span>SOLVIT</span></a>
+                <div class="nav-links" id="mainNav"></div>
+            </div>
+        </header>
+        <section class="hero-section container">
+            <div class="badge"><i class="fas fa-crown"></i> Unified AI Governance</div>
+            <h1>Smart Governance.<br /><span class="highlight-gold">One Platform.</span> <span class="highlight-blue">For 1.4 Billion</span></h1>
+            <p>SOLVIT brings 12 essential government services under one digital roof. AI-powered · Blockchain-secured · 3D-enhanced.</p>
+            <div class="hero-actions">
+                <a href="services.html" class="btn-large primary"><i class="fas fa-rocket"></i> Explore Services</a>
+                <button class="btn-large ghost"><i class="fas fa-play-circle"></i> Watch Demo</button>
+            </div>
+        </section>
+        <section class="stats-section container">
+            <div class="stats-grid">
+                <div><div class="stat-number"><span class="counter" data-target="140">0</span>Cr+</div><div class="stat-label">Citizens Served</div></div>
+                <div><div class="stat-number"><span class="counter" data-target="12">0</span></div><div class="stat-label">Government Services</div></div>
+                <div><div class="stat-number"><span class="counter" data-target="22">0</span></div><div class="stat-label">Indian Languages</div></div>
+                <div><div class="stat-number"><span class="counter" data-target="91">0</span>%</div><div class="stat-label">AI Classification Accuracy</div></div>
+            </div>
+        </section>
+        <footer class="footer" style="margin-top:0;">
+            <div class="container">
+                <div class="footer-grid">
+                    <div class="footer-brand"><div class="logo"><i class="fas fa-gavel"></i><span>SOLVIT</span></div><p>Smart Governance. One Platform. For 1.4 Billion.</p><div class="social-links"><a href="#"><i class="fab fa-twitter"></i></a><a href="#"><i class="fab fa-linkedin-in"></i></a><a href="#"><i class="fab fa-github"></i></a><a href="#"><i class="fab fa-youtube"></i></a></div></div>
+                    <div class="footer-links"><h4>Services</h4><a href="services.html">Complaint Management</a><a href="services.html">Petition Portal</a><a href="services.html">Land & Revenue</a></div>
+                    <div class="footer-links"><h4>Company</h4><a href="#">About Us</a><a href="#">Careers</a><a href="#">Contact</a></div>
+                    <div class="footer-links"><h4>Legal</h4><a href="#">Privacy Policy</a><a href="#">Terms</a></div>
+                </div>
+                <div class="footer-bottom"><p>&copy; 2026 SOLVIT. All rights reserved.</p></div>
+            </div>
+        </footer>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="../script.js"></script>
+</body>
+</html>

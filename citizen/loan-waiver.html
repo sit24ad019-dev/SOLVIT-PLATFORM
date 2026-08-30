@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SOLVIT - Loan Waiver Service</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="../style.css" />
+    <style>
+        .loan-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:28px; }
+        .loan-stat { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:14px 12px; text-align:center; }
+        .loan-stat .value { font-size:1.4rem; font-weight:700; color:#f59e0b; }
+        .loan-stat .label { font-size:0.75rem; color:rgba(255,255,255,0.4); margin-top:2px; }
+        .eligibility-result { background:rgba(16,185,129,0.05); border:1px solid rgba(16,185,129,0.15); border-radius:12px; padding:16px 20px; margin:12px 0 18px; display:none; }
+        .eligibility-result.show { display:block; }
+        .eligibility-result .status { font-size:1.1rem; font-weight:600; }
+        .eligibility-result .status.eligible { color:#10b981; }
+        .eligibility-result .status.not-eligible { color:#ef4444; }
+        .eligibility-result .details { font-size:0.9rem; color:rgba(255,255,255,0.6); margin-top:4px; }
+        .btn-check { padding:10px 24px; background:linear-gradient(135deg,#10b981,#059669); border:none; border-radius:10px; color:#fff; font-weight:600; font-size:0.95rem; cursor:pointer; transition:0.3s; margin-top:4px; }
+        .btn-check:hover { transform:scale(1.02); box-shadow:0 8px 25px rgba(16,185,129,0.3); }
+    </style>
+</head>
+<body>
+    <div id="three-canvas"></div>
+    <div class="app-overlay">
+        <header>
+            <div class="container nav-inner">
+                <a href="index.html" class="logo"><i class="fas fa-gavel"></i><span>SOLVIT</span></a>
+                <div class="nav-links" id="mainNav"></div>
+            </div>
+        </header>
+        <section class="form-section">
+            <div class="container">
+                <div class="form-card">
+                    <h2>🌾 Loan Waiver Service</h2>
+                    <p class="subtitle">Apply for government loan waiver, track your application, and get debt relief.</p>
+                    <div class="loan-stats">
+                        <div class="loan-stat"><div class="value">₹75,000</div><div class="label">Max Waiver Amount</div></div>
+                        <div class="loan-stat"><div class="value">45 Days</div><div class="label">SLA (RBI Norm)</div></div>
+                        <div class="loan-stat"><div class="value">96%</div><div class="label">AI Accuracy</div></div>
+                        <div class="loan-stat"><div class="value">3</div><div class="label">Departments</div></div>
+                    </div>
+                    <div id="formAlert" class="alert"></div>
+                    <form id="loanForm">
+                        <div class="form-group">
+                            <label for="aadhaar">Aadhaar Number <span class="required-star">*</span></label>
+                            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                                <input type="text" id="aadhaar" placeholder="12-digit Aadhaar number" maxlength="12" required style="flex:1; min-width:150px;" />
+                                <button type="button" id="checkEligibilityBtn" class="btn-check"><i class="fas fa-search"></i> Check Eligibility</button>
+                            </div>
+                            <div class="hint">Enter your 12-digit Aadhaar number to check loan waiver eligibility</div>
+                        </div>
+                        <div id="eligibilityResult" class="eligibility-result">
+                            <div class="status" id="eligibilityStatus">✅ ELIGIBLE</div>
+                            <div class="details" id="eligibilityDetails">Loan Amount: ₹65,000 · Full Waiver · Marginal Farmer</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="farmerName">Farmer Name <span class="required-star">*</span></label>
+                            <input type="text" id="farmerName" placeholder="Enter full name" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="mobile">Mobile Number <span class="required-star">*</span></label>
+                            <input type="tel" id="mobile" placeholder="10-digit mobile number" maxlength="10" required />
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="bankName">Bank Name <span class="required-star">*</span></label>
+                                <select id="bankName" required>
+                                    <option value="">Select Bank</option>
+                                    <option value="PACS Villupuram">PACS Villupuram</option>
+                                    <option value="PACS Salem">PACS Salem</option>
+                                    <option value="PACS Coimbatore">PACS Coimbatore</option>
+                                    <option value="PACS Madurai">PACS Madurai</option>
+                                    <option value="District Central Cooperative Bank">District Central Cooperative Bank</option>
+                                    <option value="State Cooperative Bank">State Cooperative Bank</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="loanAmount">Loan Amount (₹) <span class="required-star">*</span></label>
+                                <input type="text" id="loanAmount" placeholder="e.g., 65000" required />
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="loanDate">Loan Date <span class="required-star">*</span></label>
+                                <input type="date" id="loanDate" required />
+                            </div>
+                            <div class="form-group">
+                                <label for="farmerCategory">Farmer Category <span class="required-star">*</span></label>
+                                <select id="farmerCategory" required>
+                                    <option value="">Select Category</option>
+                                    <option value="Marginal Farmer">Marginal Farmer</option>
+                                    <option value="Small Farmer">Small Farmer</option>
+                                    <option value="Large Farmer">Large Farmer</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="loanLocation">Location (GPS / Manual) <span class="required-star">*</span></label>
+                            <div class="location-wrapper">
+                                <input type="text" id="loanLocation" placeholder="Click 'Get Location' or type manually" required />
+                                <button type="button" id="getLocationBtn" class="get-location-btn"><i class="fas fa-location-dot"></i> Get Location</button>
+                            </div>
+                            <div class="hint">Capture GPS location of your farm/land</div>
+                            <input type="hidden" id="latitude" />
+                            <input type="hidden" id="longitude" />
+                        </div>
+                        <div class="form-group">
+                            <label for="district">District <span class="required-star">*</span></label>
+                            <input type="text" id="district" placeholder="Enter your district" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="landPatta">Land Patta Document <span class="required-star">*</span></label>
+                            <label for="landPatta" class="file-upload-btn"><i class="fas fa-file-upload"></i> Choose File</label>
+                            <input type="file" id="landPatta" accept=".pdf,.jpg,.png" style="display:none;" required />
+                            <span id="pattaFileName" style="color:rgba(255,255,255,0.5); font-size:0.85rem; margin-left:10px;">No file chosen</span>
+                            <div class="hint">Upload scanned copy of Land Patta (PDF or Image)</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="loanLetter">Loan Sanction Letter <span class="required-star">*</span></label>
+                            <label for="loanLetter" class="file-upload-btn"><i class="fas fa-file-upload"></i> Choose File</label>
+                            <input type="file" id="loanLetter" accept=".pdf,.jpg,.png" style="display:none;" required />
+                            <span id="letterFileName" style="color:rgba(255,255,255,0.5); font-size:0.85rem; margin-left:10px;">No file chosen</span>
+                            <div class="hint">Upload the loan sanction letter from your bank</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="bankDetails">Bank Account Details <span class="required-star">*</span></label>
+                            <label for="bankDetails" class="file-upload-btn"><i class="fas fa-file-upload"></i> Choose File</label>
+                            <input type="file" id="bankDetails" accept=".pdf,.jpg,.png" style="display:none;" required />
+                            <span id="bankFileName" style="color:rgba(255,255,255,0.5); font-size:0.85rem; margin-left:10px;">No file chosen</span>
+                            <div class="hint">Upload a photo/passbook copy of your bank account</div>
+                        </div>
+                        <div class="form-group" style="margin-top:8px;">
+                            <label style="display:flex; align-items:flex-start; gap:10px; font-weight:400; color:rgba(255,255,255,0.6); font-size:0.9rem; cursor:pointer;">
+                                <input type="checkbox" id="consent" required style="width:18px; height:18px; margin-top:2px; accent-color:#f59e0b;" />
+                                <span>I confirm that all information provided is true and correct. I authorize SOLVIT to verify my details with the concerned government departments. <span class="required-star">*</span></span>
+                            </label>
+                        </div>
+                        <button type="submit" class="btn-submit">📩 Submit Waiver Application</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+        <footer class="footer" style="margin-top:0;">
+            <div class="container">
+                <div class="footer-grid">
+                    <div class="footer-brand"><div class="logo"><i class="fas fa-gavel"></i><span>SOLVIT</span></div><p>Smart Governance. One Platform. For 1.4 Billion.</p><div class="social-links"><a href="#"><i class="fab fa-twitter"></i></a><a href="#"><i class="fab fa-linkedin-in"></i></a><a href="#"><i class="fab fa-github"></i></a><a href="#"><i class="fab fa-youtube"></i></a></div></div>
+                    <div class="footer-links"><h4>Services</h4><a href="services.html">Complaint Management</a><a href="services.html">Petition Portal</a><a href="services.html">Land & Revenue</a></div>
+                    <div class="footer-links"><h4>Company</h4><a href="#">About Us</a><a href="#">Careers</a></div>
+                    <div class="footer-links"><h4>Legal</h4><a href="#">Privacy Policy</a><a href="#">Terms</a></div>
+                </div>
+                <div class="footer-bottom"><p>&copy; 2026 SOLVIT. All rights reserved.</p></div>
+            </div>
+        </footer>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="../script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            showFileName('landPatta', 'pattaFileName');
+            showFileName('loanLetter', 'letterFileName');
+            showFileName('bankDetails', 'bankFileName');
+            getCurrentLocation('getLocationBtn', 'loanLocation', 'latitude', 'longitude');
+
+            document.getElementById('checkEligibilityBtn').addEventListener('click', function() {
+                const aadhaar = document.getElementById('aadhaar').value.trim();
+                if (!aadhaar || aadhaar.length !== 12) { showAlert('Please enter a valid 12-digit Aadhaar number.', 'error'); return; }
+                const result = document.getElementById('eligibilityResult');
+                const statusEl = document.getElementById('eligibilityStatus');
+                const detailsEl = document.getElementById('eligibilityDetails');
+                const isEligible = Math.random() < 0.8;
+                const loanAmount = Math.floor(Math.random() * 50000) + 25000;
+                const categories = ['Marginal Farmer', 'Small Farmer', 'Large Farmer'];
+                const category = categories[Math.floor(Math.random() * categories.length)];
+                result.classList.add('show');
+                if (isEligible) {
+                    statusEl.className = 'status eligible';
+                    statusEl.textContent = '✅ ELIGIBLE';
+                    detailsEl.textContent = `Loan Amount: ₹${loanAmount.toLocaleString()} · Full Waiver · ${category}`;
+                    document.getElementById('loanAmount').value = loanAmount;
+                    document.getElementById('farmerCategory').value = category;
+                    showAlert('✅ You are eligible for loan waiver! Fill the form to apply.', 'success');
+                } else {
+                    statusEl.className = 'status not-eligible';
+                    statusEl.textContent = '❌ NOT ELIGIBLE';
+                    detailsEl.textContent = 'You do not meet the eligibility criteria for loan waiver.';
+                    showAlert('❌ You are not eligible for loan waiver at this time.', 'error');
+                }
+            });
+
+            document.getElementById('loanForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const session = JSON.parse(localStorage.getItem('solvit_session'));
+                if (!session || !session.id) { showAlert('Please login to submit an application.', 'error'); return; }
+
+                const aadhaar = document.getElementById('aadhaar').value.trim();
+                const farmerName = document.getElementById('farmerName').value.trim();
+                const mobile = document.getElementById('mobile').value.trim();
+                const bankName = document.getElementById('bankName').value;
+                const loanAmount = document.getElementById('loanAmount').value.trim();
+                const loanDate = document.getElementById('loanDate').value;
+                const farmerCategory = document.getElementById('farmerCategory').value;
+                const location = document.getElementById('loanLocation').value.trim();
+                const district = document.getElementById('district').value.trim();
+                const lat = document.getElementById('latitude').value;
+                const lng = document.getElementById('longitude').value;
+                const consent = document.getElementById('consent').checked;
+                const landPatta = document.getElementById('landPatta').files[0];
+                const loanLetter = document.getElementById('loanLetter').files[0];
+                const bankDetails = document.getElementById('bankDetails').files[0];
+
+                if (!aadhaar || !farmerName || !mobile || !bankName || !loanAmount || !loanDate || !farmerCategory || !location || !district) { showAlert('Please fill in all required fields.', 'error'); return; }
+                if (aadhaar.length !== 12) { showAlert('Please enter a valid 12-digit Aadhaar number.', 'error'); return; }
+                if (mobile.length !== 10) { showAlert('Please enter a valid 10-digit mobile number.', 'error'); return; }
+                if (!landPatta || !loanLetter || !bankDetails) { showAlert('Please upload all required documents.', 'error'); return; }
+                if (!lat || !lng) { showAlert('Please capture your GPS location.', 'error'); return; }
+                if (!consent) { showAlert('Please read and accept the consent terms.', 'error'); return; }
+
+                const appData = {
+                    id: 'LNW-' + Date.now(),
+                    aadhaar, farmerName, mobile, bankName, loanAmount: parseFloat(loanAmount),
+                    loanDate, farmerCategory, location, district,
+                    latitude: lat, longitude: lng,
+                    landPatta: landPatta.name,
+                    loanLetter: loanLetter.name,
+                    bankDetails: bankDetails.name,
+                    status: 'Submitted',
+                    createdAt: new Date().toISOString(),
+                    userId: session.id,
+                    userName: session.name,
+                    timeline: [{ status: 'Submitted', date: new Date().toISOString(), remark: 'Loan waiver application submitted successfully.' }]
+                };
+
+                fetch('http://localhost:5000/api/loan', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(appData)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert('✅ Application submitted successfully! Redirecting to Dashboard...', 'success');
+                        document.getElementById('loanForm').reset();
+                        document.getElementById('pattaFileName').textContent = 'No file chosen';
+                        document.getElementById('letterFileName').textContent = 'No file chosen';
+                        document.getElementById('bankFileName').textContent = 'No file chosen';
+                        document.getElementById('latitude').value = '';
+                        document.getElementById('longitude').value = '';
+                        document.getElementById('eligibilityResult').classList.remove('show');
+                        setTimeout(() => window.location.href = 'dashboard.html', 1500);
+                    } else {
+                        showAlert('Submission failed: ' + (data.error || 'Unknown error'), 'error');
+                    }
+                })
+                .catch(err => { console.error('Error:', err); showAlert('Network error. Please try again.', 'error'); });
+            });
+
+            function showAlert(msg, type) {
+                const alertDiv = document.getElementById('formAlert');
+                alertDiv.textContent = msg;
+                alertDiv.className = 'alert ' + type;
+                setTimeout(() => alertDiv.className = 'alert', 5000);
+            }
+        });
+    </script>
+</body>
+</html>

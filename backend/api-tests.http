@@ -1,0 +1,126 @@
+### ─── HEALTH CHECK ───
+GET http://localhost:5000/api/health
+
+### ─── GET ALL USERS ───
+GET http://localhost:5000/api/users
+
+### ─── REGISTER A USER ───
+POST http://localhost:5000/api/users/register
+Content-Type: application/json
+
+{
+  "id": "USR-001",
+  "fullName": "Test User",
+  "email": "test@example.com",
+  "mobile": "9876543210",
+  "password": "password123",
+  "role": "citizen",
+  "state": "Tamil Nadu",
+  "district": "Chennai",
+  "language": "English",
+  "registeredAt": "2026-08-28T10:00:00.000Z"
+}
+
+### ─── LOGIN ───
+POST http://localhost:5000/api/users/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "password123",
+  "role": "citizen"
+}
+
+### ─── GET ALL COMPLAINTS ───
+GET http://localhost:5000/api/complaints
+
+### ─── CREATE A COMPLAINT ───
+POST http://localhost:5000/api/complaints
+Content-Type: application/json
+
+{
+  "id": "CMP-001",
+  "title": "Pothole on Main Road",
+  "description": "Large pothole near the signal causing traffic",
+  "category": "Road",
+  "location": "Main Road, Chennai",
+  "district": "Chennai",
+  "status": "Submitted",
+  "createdAt": "2026-08-28T10:00:00.000Z",
+  "userId": "USR-001",
+  "userName": "Test User",
+  "media": "photo.jpg",
+  "timeline": [
+    {
+      "status": "Submitted",
+      "date": "2026-08-28T10:00:00.000Z",
+      "remark": "Complaint submitted successfully"
+    }
+  ]
+}
+
+### ─── GET ALL PETITIONS ───
+GET http://localhost:5000/api/petitions
+
+### ─── CREATE A PETITION ───
+POST http://localhost:5000/api/petitions
+Content-Type: application/json
+
+{
+  "id": "PET-001",
+  "title": "Fix Street Lights",
+  "description": "Street lights are not working in our area",
+  "category": "Infrastructure",
+  "district": "Chennai",
+  "state": "Tamil Nadu",
+  "location": "Anna Nagar, Chennai",
+  "status": "Active",
+  "createdAt": "2026-08-28T10:00:00.000Z",
+  "userId": "USR-001",
+  "userName": "Test User"
+}
+
+### ─── GET ALL LAND APPLICATIONS ───
+GET http://localhost:5000/api/land
+
+### ─── CREATE LAND APPLICATION ───
+POST http://localhost:5000/api/land
+Content-Type: application/json
+
+{
+  "id": "LND-001",
+  "surveyNumber": "123/456",
+  "ownerName": "Ram Kumar",
+  "propertyType": "Residential",
+  "area": "1200 sq.ft",
+  "location": "Villupuram",
+  "district": "Villupuram",
+  "status": "Submitted",
+  "createdAt": "2026-08-28T10:00:00.000Z",
+  "userId": "USR-001",
+  "userName": "Test User"
+}
+
+### ─── GET ALL RTI REQUESTS ───
+GET http://localhost:5000/api/rti
+
+### ─── GET ALL HEALTH REPORTS ───
+GET http://localhost:5000/api/health-reports
+
+### ─── GET ALL EDUCATION REPORTS ───
+GET http://localhost:5000/api/education-reports
+
+### ─── GET ALL SAFETY COMPLAINTS ───
+GET http://localhost:5000/api/safety-complaints
+
+### ─── GET ALL AGRICULTURE APPLICATIONS ───
+GET http://localhost:5000/api/agriculture
+
+### ─── GET ALL LOAN APPLICATIONS ───
+GET http://localhost:5000/api/loan
+
+### ─── GET ALL CORRUPTION REPORTS ───
+GET http://localhost:5000/api/corruption
+
+### ─── GET ALL INFRASTRUCTURE REPORTS ───
+GET http://localhost:5000/api/infrastructure

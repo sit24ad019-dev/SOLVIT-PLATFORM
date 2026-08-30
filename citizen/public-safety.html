@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SOLVIT - Public Safety</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+    <div id="three-canvas"></div>
+    <div class="app-overlay">
+        <header>
+            <div class="container nav-inner">
+                <a href="index.html" class="logo"><i class="fas fa-gavel"></i><span>SOLVIT</span></a>
+                <div class="nav-links" id="mainNav"></div>
+            </div>
+        </header>
+        <section class="form-section">
+            <div class="container">
+                <div class="form-card">
+                    <h2>👮 Public Safety & Policing</h2>
+                    <p class="subtitle">Report police complaints, track FIR, and use the emergency SOS button.</p>
+                    <div id="formAlert" class="alert"></div>
+                    <form id="safetyForm">
+                        <div class="form-group">
+                            <label for="incidentType">Incident Type <span class="required-star">*</span></label>
+                            <select id="incidentType" required>
+                                <option value="">Select Type</option>
+                                <option value="Theft">Theft</option>
+                                <option value="Assault">Assault</option>
+                                <option value="Domestic Violence">Domestic Violence</option>
+                                <option value="Cybercrime">Cybercrime</option>
+                                <option value="Traffic Violation">Traffic Violation</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="incidentDesc">Description <span class="required-star">*</span></label>
+                            <textarea id="incidentDesc" placeholder="Detailed description of the incident" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="incidentLocation">Location (GPS / Manual) <span class="required-star">*</span></label>
+                            <div class="location-wrapper">
+                                <input type="text" id="incidentLocation" placeholder="Click 'Get Location' or type manually" required />
+                                <button type="button" id="getLocationBtn" class="get-location-btn"><i class="fas fa-location-dot"></i> Get Location</button>
+                            </div>
+                            <div class="hint">Capture GPS location or enter address manually.</div>
+                            <input type="hidden" id="latitude" />
+                            <input type="hidden" id="longitude" />
+                        </div>
+                        <div class="form-group">
+                            <label for="district">District <span class="required-star">*</span></label>
+                            <input type="text" id="district" placeholder="Enter your district" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="safetyPhoto">Upload Photo <span class="required-star">*</span></label>
+                            <label for="safetyPhoto" class="file-upload-btn"><i class="fas fa-image"></i> Choose Photo</label>
+                            <input type="file" id="safetyPhoto" accept="image/*" style="display:none;" required />
+                            <span id="photoFileName" style="color:rgba(255,255,255,0.5); font-size:0.85rem; margin-left:10px;">No file chosen</span>
+                        </div>
+                        <button type="submit" class="btn-submit">📩 Submit Complaint</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+        <footer class="footer" style="margin-top:0;">
+            <div class="container">
+                <div class="footer-grid">
+                    <div class="footer-brand"><div class="logo"><i class="fas fa-gavel"></i><span>SOLVIT</span></div><p>Smart Governance. One Platform. For 1.4 Billion.</p><div class="social-links"><a href="#"><i class="fab fa-twitter"></i></a><a href="#"><i class="fab fa-linkedin-in"></i></a><a href="#"><i class="fab fa-github"></i></a><a href="#"><i class="fab fa-youtube"></i></a></div></div>
+                    <div class="footer-links"><h4>Services</h4><a href="services.html">Complaint Management</a><a href="services.html">Petition Portal</a><a href="services.html">Land & Revenue</a></div>
+                    <div class="footer-links"><h4>Company</h4><a href="#">About Us</a><a href="#">Careers</a></div>
+                    <div class="footer-links"><h4>Legal</h4><a href="#">Privacy Policy</a><a href="#">Terms</a></div>
+                </div>
+                <div class="footer-bottom"><p>&copy; 2026 SOLVIT. All rights reserved.</p></div>
+            </div>
+        </footer>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="../script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            showFileName('safetyPhoto', 'photoFileName');
+            getCurrentLocation('getLocationBtn', 'incidentLocation', 'latitude', 'longitude');
+
+            document.getElementById('safetyForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const session = JSON.parse(localStorage.getItem('solvit_session'));
+                if (!session || !session.id) { showAlert('Please login to file a complaint.', 'error'); return; }
+
+                const incidentType = document.getElementById('incidentType').value;
+                const description = document.getElementById('incidentDesc').value.trim();
+                const location = document.getElementById('incidentLocation').value.trim();
+                const district = document.getElementById('district').value.trim();
+                const lat = document.getElementById('latitude').value;
+                const lng = document.getElementById('longitude').value;
+                const photo = document.getElementById('safetyPhoto').files[0];
+
+                if (!incidentType || !description || !location || !district) { showAlert('Please fill in all required fields.', 'error'); return; }
+                if (!photo) { showAlert('Please upload a photo (mandatory).', 'error'); return; }
+                if (!lat || !lng) { showAlert('Please capture your GPS location.', 'error'); return; }
+
+                const complaintData = {
+                    id: 'SAF-' + Date.now(),
+                    incidentType, description, location, district,
+                    latitude: lat, longitude: lng,
+                    photo: photo.name,
+                    status: 'Reported',
+                    createdAt: new Date().toISOString(),
+                    userId: session.id,
+                    userName: session.name,
+                    timeline: [{ status: 'Reported', date: new Date().toISOString(), remark: 'Police complaint filed successfully.' }]
+                };
+
+                fetch('http://localhost:5000/api/safety-complaints', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(complaintData)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert('✅ Complaint submitted successfully! Redirecting to Dashboard...', 'success');
+                        document.getElementById('safetyForm').reset();
+                        document.getElementById('photoFileName').textContent = 'No file chosen';
+                        document.getElementById('latitude').value = '';
+                        document.getElementById('longitude').value = '';
+                        setTimeout(() => window.location.href = 'dashboard.html', 1500);
+                    } else {
+                        showAlert('Submission failed: ' + (data.error || 'Unknown error'), 'error');
+                    }
+                })
+                .catch(err => { console.error('Error:', err); showAlert('Network error. Please try again.', 'error'); });
+            });
+
+            function showAlert(msg, type) {
+                const alertDiv = document.getElementById('formAlert');
+                alertDiv.textContent = msg;
+                alertDiv.className = 'alert ' + type;
+                setTimeout(() => alertDiv.className = 'alert', 5000);
+            }
+        });
+    </script>
+</body>
+</html>

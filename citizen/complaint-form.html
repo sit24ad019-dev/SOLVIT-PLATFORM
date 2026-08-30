@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SOLVIT - Report Complaint</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+    <div id="three-canvas"></div>
+    <div class="app-overlay">
+        <header>
+            <div class="container nav-inner">
+                <a href="index.html" class="logo"><i class="fas fa-gavel"></i><span>SOLVIT</span></a>
+                <div class="nav-links" id="mainNav"></div>
+            </div>
+        </header>
+        <section class="form-section">
+            <div class="container">
+                <div class="form-card">
+                    <h2>📝 Report a Complaint</h2>
+                    <p class="subtitle">Describe your civic issue and we'll route it to the right department.</p>
+                    <div id="formAlert" class="alert"></div>
+                    <form id="complaintForm">
+                        <div class="form-group">
+                            <label for="complaintMedia">Upload Photo <span class="required-star">*</span></label>
+                            <label for="complaintMedia" class="file-upload-btn"><i class="fas fa-image"></i> Choose Image File</label>
+                            <input type="file" id="complaintMedia" accept="image/*" style="display:none;" required />
+                            <span id="imageFileName" style="color:rgba(255,255,255,0.5); font-size:0.85rem; margin-left:10px;">No file chosen</span>
+                            <div class="hint">Upload a clear photo of the issue (JPG, PNG, GIF)</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="complaintTitle">Title <span class="required-star">*</span></label>
+                            <input type="text" id="complaintTitle" placeholder="Brief title" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="complaintDescription">Description <span class="required-star">*</span></label>
+                            <textarea id="complaintDescription" placeholder="Detailed explanation" required></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="complaintCategory">Category <span class="required-star">*</span></label>
+                                <select id="complaintCategory" required>
+                                    <option value="Road">Road</option>
+                                    <option value="Garbage">Garbage</option>
+                                    <option value="Drainage">Drainage</option>
+                                    <option value="Street Light">Street Light</option>
+                                    <option value="Electricity">Electricity</option>
+                                    <option value="Water Supply">Water Supply</option>
+                                    <option value="Illegal Dumping">Illegal Dumping</option>
+                                    <option value="Flood">Flood</option>
+                                    <option value="Tree Fall">Tree Fall</option>
+                                    <option value="Public Property Damage">Public Property Damage</option>
+                                    <option value="Encroachment">Encroachment</option>
+                                    <option value="Animal Issue">Animal Issue</option>
+                                    <option value="Noise Pollution">Noise Pollution</option>
+                                    <option value="Others">Others</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="complaintLocation">Location (GPS / Manual) <span class="required-star">*</span></label>
+                                <div class="location-input-wrapper">
+                                    <input type="text" id="complaintLocation" placeholder="Click 'Get Location' or type manually" required />
+                                    <button type="button" id="getLocationBtn"><i class="fas fa-location-dot"></i> Get Location</button>
+                                </div>
+                                <div class="hint">We'll use your current GPS location. You can also type any address.</div>
+                                <input type="hidden" id="latitude" />
+                                <input type="hidden" id="longitude" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="district">District <span class="required-star">*</span></label>
+                            <input type="text" id="district" placeholder="Enter your district" required />
+                        </div>
+                        <button type="submit" class="btn-submit">🚀 Submit Complaint</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+        <footer class="footer" style="margin-top:0;">
+            <div class="container">
+                <div class="footer-grid">
+                    <div class="footer-brand"><div class="logo"><i class="fas fa-gavel"></i><span>SOLVIT</span></div><p>Smart Governance. One Platform. For 1.4 Billion.</p><div class="social-links"><a href="#"><i class="fab fa-twitter"></i></a><a href="#"><i class="fab fa-linkedin-in"></i></a><a href="#"><i class="fab fa-github"></i></a><a href="#"><i class="fab fa-youtube"></i></a></div></div>
+                    <div class="footer-links"><h4>Services</h4><a href="services.html">Complaint Management</a><a href="services.html">Petition Portal</a><a href="services.html">Land & Revenue</a></div>
+                    <div class="footer-links"><h4>Company</h4><a href="#">About Us</a><a href="#">Careers</a></div>
+                    <div class="footer-links"><h4>Legal</h4><a href="#">Privacy Policy</a><a href="#">Terms</a></div>
+                </div>
+                <div class="footer-bottom"><p>&copy; 2026 SOLVIT. All rights reserved.</p></div>
+            </div>
+        </footer>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="../script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // ─── HELPERS ───
+            showFileName('complaintMedia', 'imageFileName');
+            getCurrentLocation('getLocationBtn', 'complaintLocation', 'latitude', 'longitude');
+
+            // ─── FORM SUBMISSION ───
+            document.getElementById('complaintForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const session = JSON.parse(localStorage.getItem('solvit_session'));
+                if (!session || !session.id) {
+                    showAlert('Please login to submit a complaint.', 'error');
+                    return;
+                }
+
+                const title = document.getElementById('complaintTitle').value.trim();
+                const description = document.getElementById('complaintDescription').value.trim();
+                const category = document.getElementById('complaintCategory').value;
+                const location = document.getElementById('complaintLocation').value.trim();
+                const district = document.getElementById('district').value.trim();
+                const mediaFile = document.getElementById('complaintMedia').files[0];
+                const lat = document.getElementById('latitude').value;
+                const lng = document.getElementById('longitude').value;
+
+                if (!title || !description || !location || !district) {
+                    showAlert('Please fill in all required fields.', 'error');
+                    return;
+                }
+                if (!mediaFile) {
+                    showAlert('Please upload a photo (mandatory).', 'error');
+                    return;
+                }
+                if (!lat || !lng) {
+                    showAlert('Please capture your GPS location.', 'error');
+                    return;
+                }
+
+                const complaintData = {
+                    id: 'CMP-' + Date.now(),
+                    title,
+                    description,
+                    category,
+                    location,
+                    district,
+                    latitude: lat,
+                    longitude: lng,
+                    status: 'Submitted',
+                    createdAt: new Date().toISOString(),
+                    userId: session.id,
+                    userName: session.name,
+                    media: mediaFile.name,
+                    timeline: [
+                        {
+                            status: 'Submitted',
+                            date: new Date().toISOString(),
+                            remark: 'Complaint submitted successfully.'
+                        }
+                    ]
+                };
+
+                // ─── SEND TO BACKEND API ───
+                fetch('http://localhost:5000/api/complaints', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(complaintData)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert('✅ Complaint submitted successfully! Redirecting to Dashboard...', 'success');
+                        document.getElementById('complaintForm').reset();
+                        document.getElementById('imageFileName').textContent = 'No file chosen';
+                        document.getElementById('latitude').value = '';
+                        document.getElementById('longitude').value = '';
+                        setTimeout(() => window.location.href = 'dashboard.html', 1500);
+                    } else {
+                        showAlert('Submission failed: ' + (data.error || 'Unknown error'), 'error');
+                    }
+                })
+                .catch(err => {
+                    console.error('Submission error:', err);
+                    showAlert('Network error. Please try again.', 'error');
+                });
+            });
+
+            function showAlert(message, type) {
+                const alertDiv = document.getElementById('formAlert');
+                alertDiv.textContent = message;
+                alertDiv.className = 'alert ' + type;
+                setTimeout(() => alertDiv.className = 'alert', 5000);
+            }
+        });
+    </script>
+</body>
+</html>

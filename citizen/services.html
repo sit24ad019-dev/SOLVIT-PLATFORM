@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SOLVIT - Citizen Services</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="../style.css" />
+    <style>
+        .section-header { text-align:center; padding:20px 0 10px; }
+        .section-header h2 { font-family:'Playfair Display',serif; font-size:2.4rem; }
+        .section-header p { color:rgba(255,255,255,0.5); }
+    </style>
+</head>
+<body>
+    <div id="three-canvas"></div>
+    <div class="app-overlay">
+        <header>
+            <div class="container nav-inner">
+                <a href="index.html" class="logo"><i class="fas fa-gavel"></i><span>SOLVIT</span></a>
+                <div class="nav-links" id="mainNav"></div>
+            </div>
+        </header>
+        <section class="container">
+            <div class="section-header">
+                <h2>🚀 Citizen Services</h2>
+                <p>Click a service to submit a complaint or application.</p>
+            </div>
+            <div class="services-grid" id="citizenServicesGrid"></div>
+        </section>
+        <footer class="footer" style="margin-top:0;">
+            <div class="container">
+                <div class="footer-grid">
+                    <div class="footer-brand"><div class="logo"><i class="fas fa-gavel"></i><span>SOLVIT</span></div><p>Smart Governance. One Platform. For 1.4 Billion.</p><div class="social-links"><a href="#"><i class="fab fa-twitter"></i></a><a href="#"><i class="fab fa-linkedin-in"></i></a><a href="#"><i class="fab fa-github"></i></a><a href="#"><i class="fab fa-youtube"></i></a></div></div>
+                    <div class="footer-links"><h4>Services</h4><a href="services.html">Complaint Management</a><a href="services.html">Petition Portal</a><a href="services.html">Land & Revenue</a></div>
+                    <div class="footer-links"><h4>Company</h4><a href="#">About Us</a><a href="#">Careers</a></div>
+                    <div class="footer-links"><h4>Legal</h4><a href="#">Privacy Policy</a><a href="#">Terms</a></div>
+                </div>
+                <div class="footer-bottom"><p>&copy; 2026 SOLVIT. All rights reserved.</p></div>
+            </div>
+        </footer>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="../script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const services = [
+                { label: 'Complaint Management', icon: 'fa-file-signature', desc: 'Report & track civic issues with AI.', tag: 'AI · Blockchain', url: 'complaint-form.html' },
+                { label: 'Petition Portal', icon: 'fa-pen-fancy', desc: 'Create and sign digital petitions.', tag: 'Digital Signature', url: 'petition-form.html' },
+                { label: 'Land & Revenue', icon: 'fa-map-marked-alt', desc: 'Access land records and apply for mutation.', tag: 'GIS · Records', url: 'land-revenue.html' },
+                { label: 'RTI Requests', icon: 'fa-info-circle', desc: 'File RTI applications and track appeals.', tag: 'Transparency', url: 'rti-requests.html' },
+                { label: 'Public Health', icon: 'fa-heartbeat', desc: 'Report health issues and find hospitals.', tag: 'Emergency', url: 'public-health.html' },
+                { label: 'Education Services', icon: 'fa-graduation-cap', desc: 'School details, scholarships, meal tracking.', tag: 'Student Focus', url: 'education-services.html' },
+                { label: 'Public Safety', icon: 'fa-shield-alt', desc: 'Police complaints, FIR tracking, SOS.', tag: 'SOS · Safety', url: 'public-safety.html' },
+                { label: 'Rural & Agriculture', icon: 'fa-tractor', desc: 'Crop insurance, subsidies, weather alerts.', tag: 'Farmer First', url: 'rural-agriculture.html' },
+                { label: 'Loan Waiver', icon: 'fa-hand-holding-usd', desc: 'Apply for farmer loan waiver with AI check.', tag: 'Farmer Relief', url: 'loan-waiver.html' },
+                { label: 'Corruption Reporting', icon: 'fa-user-secret', desc: 'Report corruption anonymously.', tag: 'Anonymous', url: 'corruption-reporting.html' },
+                { label: 'Fund Transparency', icon: 'fa-coins', desc: 'Track government spending in real-time.', tag: 'Real-time', url: 'fund-transparency.html' },
+                { label: 'Project Monitoring', icon: 'fa-chart-line', desc: 'Follow public projects with milestones.', tag: 'Live Updates', url: 'project-monitoring.html' },
+            ];
+            const container = document.getElementById('citizenServicesGrid');
+            services.forEach(s => {
+                const card = document.createElement('div');
+                card.className = 'service-card';
+                card.setAttribute('onclick', `window.location.href='${s.url}'`);
+                card.innerHTML = `
+                    <div class="card-icon"><i class="fas ${s.icon}"></i></div>
+                    <h3>${s.label}</h3>
+                    <p>${s.desc}</p>
+                    <span class="card-tag">${s.tag}</span>
+                `;
+                container.appendChild(card);
+            });
+        });
+    </script>
+</body>
+</html>

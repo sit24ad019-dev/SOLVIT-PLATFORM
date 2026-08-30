@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SOLVIT - RTI Requests</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+    <div id="three-canvas"></div>
+    <div class="app-overlay">
+        <header>
+            <div class="container nav-inner">
+                <a href="index.html" class="logo"><i class="fas fa-gavel"></i><span>SOLVIT</span></a>
+                <div class="nav-links" id="mainNav"></div>
+            </div>
+        </header>
+        <section class="form-section">
+            <div class="container">
+                <div class="form-card">
+                    <h2>📄 RTI Request</h2>
+                    <p class="subtitle">File your Right to Information request online with ease.</p>
+                    <div id="formAlert" class="alert"></div>
+                    <form id="rtiForm">
+                        <div class="form-group">
+                            <label for="rtiDepartment">Department <span class="required-star">*</span></label>
+                            <select id="rtiDepartment" required>
+                                <option value="">Select Department</option>
+                                <option value="PWD">Public Works Department</option>
+                                <option value="Municipal Corporation">Municipal Corporation</option>
+                                <option value="Electricity Board">Electricity Board</option>
+                                <option value="Water Supply">Water Supply Department</option>
+                                <option value="Revenue Department">Revenue Department</option>
+                                <option value="Health Department">Health Department</option>
+                                <option value="Education Department">Education Department</option>
+                                <option value="Police Department">Police Department</option>
+                                <option value="Transport Department">Transport Department</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="rtiQuestion">Information Required <span class="required-star">*</span></label>
+                            <textarea id="rtiQuestion" placeholder="What information do you need? Be specific." required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="rtiReason">Reason for Request <span class="required-star">*</span></label>
+                            <select id="rtiReason" required>
+                                <option value="Personal">Personal</option>
+                                <option value="Professional">Professional</option>
+                                <option value="Public Interest">Public Interest</option>
+                                <option value="Academic Research">Academic Research</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="rtiPeriod">Period (From)</label>
+                                <input type="date" id="rtiPeriod" />
+                            </div>
+                            <div class="form-group">
+                                <label for="rtiFormat">Preferred Format</label>
+                                <select id="rtiFormat">
+                                    <option value="Printed Copy">Printed Copy</option>
+                                    <option value="Digital Copy (PDF)">Digital Copy (PDF)</option>
+                                    <option value="Inspection">Inspection</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="district">District <span class="required-star">*</span></label>
+                            <input type="text" id="district" placeholder="Enter your district" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="rtiDocument">Upload Supporting Documents <span style="color:#f59e0b;">(optional)</span></label>
+                            <label for="rtiDocument" class="file-upload-btn"><i class="fas fa-file-upload"></i> Choose Files</label>
+                            <input type="file" id="rtiDocument" accept=".pdf,.jpg,.png,.doc,.docx" style="display:none;" multiple />
+                            <span id="docFileName" style="color:rgba(255,255,255,0.5); font-size:0.85rem; margin-left:10px;">No file chosen</span>
+                            <div class="hint">PDF, Images, or Word documents (max 5MB)</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="rtiNotes">Additional Notes</label>
+                            <textarea id="rtiNotes" placeholder="Any other details..." rows="3"></textarea>
+                        </div>
+                        <button type="submit" class="btn-submit">📩 Submit RTI Request</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+        <footer class="footer" style="margin-top:0;">
+            <div class="container">
+                <div class="footer-grid">
+                    <div class="footer-brand"><div class="logo"><i class="fas fa-gavel"></i><span>SOLVIT</span></div><p>Smart Governance. One Platform. For 1.4 Billion.</p><div class="social-links"><a href="#"><i class="fab fa-twitter"></i></a><a href="#"><i class="fab fa-linkedin-in"></i></a><a href="#"><i class="fab fa-github"></i></a><a href="#"><i class="fab fa-youtube"></i></a></div></div>
+                    <div class="footer-links"><h4>Services</h4><a href="services.html">Complaint Management</a><a href="services.html">Petition Portal</a><a href="services.html">Land & Revenue</a></div>
+                    <div class="footer-links"><h4>Company</h4><a href="#">About Us</a><a href="#">Careers</a></div>
+                    <div class="footer-links"><h4>Legal</h4><a href="#">Privacy Policy</a><a href="#">Terms</a></div>
+                </div>
+                <div class="footer-bottom"><p>&copy; 2026 SOLVIT. All rights reserved.</p></div>
+            </div>
+        </footer>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="../script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('rtiDocument').addEventListener('change', function(e) {
+                const files = this.files; let names = [];
+                for (let i = 0; i < files.length; i++) names.push(files[i].name);
+                document.getElementById('docFileName').textContent = names.length > 0 ? names.join(', ') : 'No file chosen';
+            });
+
+            document.getElementById('rtiForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const session = JSON.parse(localStorage.getItem('solvit_session'));
+                if (!session || !session.id) { showAlert('Please login to file an RTI request.', 'error'); return; }
+
+                const department = document.getElementById('rtiDepartment').value;
+                const question = document.getElementById('rtiQuestion').value.trim();
+                const reason = document.getElementById('rtiReason').value;
+                const period = document.getElementById('rtiPeriod').value;
+                const format = document.getElementById('rtiFormat').value;
+                const district = document.getElementById('district').value.trim();
+                const notes = document.getElementById('rtiNotes').value.trim();
+                const docFile = document.getElementById('rtiDocument').files[0];
+
+                if (!department || !question || !district) { showAlert('Please fill in all required fields.', 'error'); return; }
+
+                const rtiData = {
+                    id: 'RTI-' + Date.now(),
+                    department, question, reason,
+                    period: period || 'N/A',
+                    format,
+                    district,
+                    document: docFile ? docFile.name : null,
+                    notes: notes || '',
+                    status: 'Submitted',
+                    createdAt: new Date().toISOString(),
+                    userId: session.id,
+                    userName: session.name,
+                    timeline: [{ status: 'Submitted', date: new Date().toISOString(), remark: 'RTI request submitted successfully.' }]
+                };
+
+                fetch('http://localhost:5000/api/rti', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(rtiData)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert('✅ RTI request submitted successfully! Redirecting to Dashboard...', 'success');
+                        document.getElementById('rtiForm').reset();
+                        document.getElementById('docFileName').textContent = 'No file chosen';
+                        setTimeout(() => window.location.href = 'dashboard.html', 1500);
+                    } else {
+                        showAlert('Submission failed: ' + (data.error || 'Unknown error'), 'error');
+                    }
+                })
+                .catch(err => { console.error('Error:', err); showAlert('Network error. Please try again.', 'error'); });
+            });
+
+            function showAlert(msg, type) {
+                const alertDiv = document.getElementById('formAlert');
+                alertDiv.textContent = msg;
+                alertDiv.className = 'alert ' + type;
+                setTimeout(() => alertDiv.className = 'alert', 5000);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SOLVIT - Land & Revenue</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+    <div id="three-canvas"></div>
+    <div class="app-overlay">
+        <header>
+            <div class="container nav-inner">
+                <a href="index.html" class="logo"><i class="fas fa-gavel"></i><span>SOLVIT</span></a>
+                <div class="nav-links" id="mainNav"></div>
+            </div>
+        </header>
+        <section class="form-section">
+            <div class="container">
+                <div class="form-card">
+                    <h2>🏠 Land & Revenue Services</h2>
+                    <p class="subtitle">View and apply for land records, mutation, and related services.</p>
+                    <div id="formAlert" class="alert"></div>
+                    <form id="landForm">
+                        <div class="form-group">
+                            <label for="surveyNumber">Survey Number <span class="required-star">*</span></label>
+                            <input type="text" id="surveyNumber" placeholder="e.g., 123/456" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="ownerName">Owner Name <span class="required-star">*</span></label>
+                            <input type="text" id="ownerName" placeholder="Full name of the owner" required />
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="propertyType">Property Type <span class="required-star">*</span></label>
+                                <select id="propertyType" required>
+                                    <option value="Agricultural">Agricultural</option>
+                                    <option value="Residential">Residential</option>
+                                    <option value="Commercial">Commercial</option>
+                                    <option value="Industrial">Industrial</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="area">Area <span class="required-star">*</span></label>
+                                <input type="text" id="area" placeholder="e.g., 2.5 acres, 1200 sq.ft" required />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="landLocation">Location (GPS / Manual) <span class="required-star">*</span></label>
+                            <div class="location-wrapper">
+                                <input type="text" id="landLocation" placeholder="Click 'Get Location' or type manually" required />
+                                <button type="button" id="getLocationBtn" class="get-location-btn"><i class="fas fa-location-dot"></i> Get Location</button>
+                            </div>
+                            <div class="hint">Capture current GPS location or enter address manually.</div>
+                            <input type="hidden" id="latitude" />
+                            <input type="hidden" id="longitude" />
+                        </div>
+                        <div class="form-group">
+                            <label for="district">District <span class="required-star">*</span></label>
+                            <input type="text" id="district" placeholder="Enter your district" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="landDocument">Upload Supporting Document <span class="required-star">*</span></label>
+                            <label for="landDocument" class="file-upload-btn"><i class="fas fa-file-pdf"></i> Choose Document</label>
+                            <input type="file" id="landDocument" accept=".pdf,.jpg,.png" style="display:none;" required />
+                            <span id="docFileName" style="color:rgba(255,255,255,0.5); font-size:0.85rem; margin-left:10px;">No file chosen</span>
+                            <div class="hint">Upload Patta, Chitta, or any supporting document (PDF/Image)</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="landNotes">Additional Notes</label>
+                            <textarea id="landNotes" placeholder="Any extra details or requests..." rows="3"></textarea>
+                        </div>
+                        <button type="submit" class="btn-submit">📩 Submit Application</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+        <footer class="footer" style="margin-top:0;">
+            <div class="container">
+                <div class="footer-grid">
+                    <div class="footer-brand"><div class="logo"><i class="fas fa-gavel"></i><span>SOLVIT</span></div><p>Smart Governance. One Platform. For 1.4 Billion.</p><div class="social-links"><a href="#"><i class="fab fa-twitter"></i></a><a href="#"><i class="fab fa-linkedin-in"></i></a><a href="#"><i class="fab fa-github"></i></a><a href="#"><i class="fab fa-youtube"></i></a></div></div>
+                    <div class="footer-links"><h4>Services</h4><a href="services.html">Complaint Management</a><a href="services.html">Petition Portal</a><a href="services.html">Land & Revenue</a></div>
+                    <div class="footer-links"><h4>Company</h4><a href="#">About Us</a><a href="#">Careers</a></div>
+                    <div class="footer-links"><h4>Legal</h4><a href="#">Privacy Policy</a><a href="#">Terms</a></div>
+                </div>
+                <div class="footer-bottom"><p>&copy; 2026 SOLVIT. All rights reserved.</p></div>
+            </div>
+        </footer>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="../script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            showFileName('landDocument', 'docFileName');
+            getCurrentLocation('getLocationBtn', 'landLocation', 'latitude', 'longitude');
+
+            document.getElementById('landForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const session = JSON.parse(localStorage.getItem('solvit_session'));
+                if (!session || !session.id) { showAlert('Please login to submit.', 'error'); return; }
+
+                const surveyNumber = document.getElementById('surveyNumber').value.trim();
+                const ownerName = document.getElementById('ownerName').value.trim();
+                const propertyType = document.getElementById('propertyType').value;
+                const area = document.getElementById('area').value.trim();
+                const location = document.getElementById('landLocation').value.trim();
+                const district = document.getElementById('district').value.trim();
+                const notes = document.getElementById('landNotes').value.trim();
+                const lat = document.getElementById('latitude').value;
+                const lng = document.getElementById('longitude').value;
+                const documentFile = document.getElementById('landDocument').files[0];
+
+                if (!surveyNumber || !ownerName || !area || !location || !district) { showAlert('Please fill in all required fields.', 'error'); return; }
+                if (!documentFile) { showAlert('Please upload a supporting document.', 'error'); return; }
+                if (!lat || !lng) { showAlert('Please capture your GPS location.', 'error'); return; }
+
+                const application = {
+                    id: 'LND-' + Date.now(),
+                    surveyNumber, ownerName, propertyType, area, location, district,
+                    latitude: lat, longitude: lng, document: documentFile.name, notes: notes || '',
+                    status: 'Submitted', createdAt: new Date().toISOString(),
+                    userId: session.id, userName: session.name,
+                    timeline: [{ status: 'Submitted', date: new Date().toISOString(), remark: 'Application submitted successfully.' }]
+                };
+
+                fetch('http://localhost:5000/api/land', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(application)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert('✅ Application submitted successfully! Redirecting to Dashboard...', 'success');
+                        document.getElementById('landForm').reset();
+                        document.getElementById('docFileName').textContent = 'No file chosen';
+                        document.getElementById('latitude').value = '';
+                        document.getElementById('longitude').value = '';
+                        setTimeout(() => window.location.href = 'dashboard.html', 1500);
+                    } else {
+                        showAlert('Submission failed: ' + (data.error || 'Unknown error'), 'error');
+                    }
+                })
+                .catch(err => { console.error('Error:', err); showAlert('Network error. Please try again.', 'error'); });
+            });
+
+            function showAlert(msg, type) {
+                const alertDiv = document.getElementById('formAlert');
+                alertDiv.textContent = msg;
+                alertDiv.className = 'alert ' + type;
+                setTimeout(() => alertDiv.className = 'alert', 5000);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SOLVIT - Login</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="style.css" />
+
+    <style>
+        .auth-section {
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+        .auth-card {
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 28px;
+            padding: 48px 40px;
+            max-width: 440px;
+            width: 100%;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+            transition: 0.3s;
+        }
+        .auth-card:hover {
+            border-color: rgba(59, 130, 246, 0.2);
+        }
+        .auth-card .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #fff;
+            text-decoration: none;
+            margin-bottom: 8px;
+        }
+        .auth-card .logo i {
+            color: #f59e0b;
+            font-size: 1.8rem;
+        }
+        .auth-card .logo span {
+            background: linear-gradient(135deg, #fff 40%, #f59e0b);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .auth-card h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 6px;
+            color: #fff;
+        }
+        .auth-card .subtitle {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.95rem;
+            margin-bottom: 28px;
+        }
+        .auth-card .subtitle i {
+            margin-right: 6px;
+            color: #f59e0b;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1rem;
+            transition: 0.3s;
+            font-family: 'Inter', sans-serif;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+        }
+        .auth-card .btn-primary {
+            width: 100%;
+            padding: 14px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 6px;
+        }
+        .auth-card .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+        }
+        .auth-footer {
+            text-align: center;
+            margin-top: 20px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+        }
+        .auth-footer a {
+            color: #3b82f6;
+            font-weight: 600;
+            transition: 0.3s;
+            text-decoration: none;
+        }
+        .auth-footer a:hover {
+            color: #8b5cf6;
+        }
+        .role-selector {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .role-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.5);
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+        .role-btn.active {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.12);
+            color: #fff;
+        }
+        .role-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .alert {
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+            display: none;
+        }
+        .alert.error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #f87171;
+            display: block;
+        }
+        .alert.success {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: #34d399;
+            display: block;
+        }
+        @media (max-width: 480px) {
+            .auth-card { padding: 32px 20px; }
+            .role-selector { flex-direction: column; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="three-canvas"></div>
+
+    <div class="app-overlay">
+        <!-- HEADER -->
+        <header>
+            <div class="container nav-inner">
+                <a href="citizen/index.html" class="logo">
+                    <i class="fas fa-gavel"></i>
+                    <span>SOLVIT</span>
+                </a>
+                <div class="nav-links" id="mainNav"></div>
+            </div>
+        </header>
+
+        <!-- LOGIN FORM -->
+        <section class="auth-section">
+            <div class="auth-card">
+                <div class="logo">
+                    <i class="fas fa-gavel"></i>
+                    <span>SOLVIT</span>
+                </div>
+                <h2>Welcome Back</h2>
+                <p class="subtitle"><i class="fas fa-shield-alt"></i> Secure access to government services</p>
+
+                <div id="loginAlert" class="alert"></div>
+
+                <div class="role-selector">
+                    <button class="role-btn active" data-role="citizen">👤 Citizen</button>
+                    <button class="role-btn" data-role="government">🏛️ Government</button>
+                </div>
+
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="loginIdentifier">Email or Mobile</label>
+                        <input type="text" id="loginIdentifier" placeholder="Enter your email or mobile" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" placeholder="Enter your password" required />
+                    </div>
+                    <button type="submit" class="btn-primary">🔐 Login</button>
+                </form>
+
+                <div class="auth-footer">
+                    Don't have an account? <a href="register.html">Register here</a>
+                </div>
+                <div class="auth-footer" style="margin-top: 8px; font-size: 0.8rem;">
+                    <span style="color: rgba(255,255,255,0.3);">Demo: test@example.com / password123</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="footer" style="margin-top: 0;">
+            <div class="container">
+                <div class="footer-grid">
+                    <div class="footer-brand">
+                        <div class="logo"><i class="fas fa-gavel"></i><span>SOLVIT</span></div>
+                        <p>Smart Governance. One Platform. For 1.4 Billion.</p>
+                        <div class="social-links">
+                            <a href="#"><i class="fab fa-twitter"></i></a>
+                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#"><i class="fab fa-github"></i></a>
+                            <a href="#"><i class="fab fa-youtube"></i></a>
+                        </div>
+                    </div>
+                    <div class="footer-links">
+                        <h4>Services</h4>
+                        <a href="citizen/services.html">Complaint Management</a>
+                        <a href="citizen/services.html">Petition Portal</a>
+                        <a href="citizen/services.html">Land & Revenue</a>
+                    </div>
+                    <div class="footer-links">
+                        <h4>Company</h4>
+                        <a href="#">About Us</a>
+                        <a href="#">Careers</a>
+                    </div>
+                    <div class="footer-links">
+                        <h4>Legal</h4>
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Terms</a>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; 2026 SOLVIT. All rights reserved. Made with ❤️ for India.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="script.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('loginForm');
+            const loginAlert = document.getElementById('loginAlert');
+            const roleBtns = document.querySelectorAll('.role-btn');
+            let selectedRole = 'citizen';
+
+            roleBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    roleBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    selectedRole = this.dataset.role;
+                });
+            });
+
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const identifier = document.getElementById('loginIdentifier').value.trim();
+                const password = document.getElementById('loginPassword').value.trim();
+
+                if (!identifier || !password) {
+                    showAlert('Please fill in all fields.', 'error');
+                    return;
+                }
+
+                // ─── CALL BACKEND API (supports email OR mobile) ───
+                fetch('http://localhost:5000/api/users/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        identifier: identifier,
+                        password: password,
+                        role: selectedRole 
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const user = data.user;
+                        localStorage.setItem('solvit_session', JSON.stringify({
+                            id: user.id,
+                            name: user.fullName,
+                            email: user.email,
+                            role: user.role,
+                            loginTime: new Date().toISOString()
+                        }));
+
+                        showAlert('✅ Login successful! Redirecting...', 'success');
+
+                        setTimeout(() => {
+                            if (user.role === 'government') {
+                                window.location.href = 'government/gov-index.html';
+                            } else {
+                                window.location.href = 'citizen/index.html';
+                            }
+                        }, 1000);
+                    } else {
+                        showAlert(data.error || 'Invalid credentials.', 'error');
+                    }
+                })
+                .catch(err => {
+                    console.error('Login error:', err);
+                    showAlert('Network error. Please try again.', 'error');
+                });
+            });
+
+            function showAlert(message, type) {
+                loginAlert.textContent = message;
+                loginAlert.className = 'alert ' + type;
+                setTimeout(() => {
+                    loginAlert.className = 'alert';
+                }, 4000);
+            }
+        });
+    </script>
+
+</body>
+</html>

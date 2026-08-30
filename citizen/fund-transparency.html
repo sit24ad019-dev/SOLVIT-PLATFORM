@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SOLVIT - Fund Transparency</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="../style.css" />
+    <style>
+        .fund-section { padding:40px 0 60px; }
+        .fund-header h2 { font-family:'Playfair Display',serif; font-size:2rem; margin-bottom:4px; }
+        .fund-header p { color:rgba(255,255,255,0.5); margin-bottom:30px; }
+        .fund-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:18px; margin-bottom:32px; }
+        .fund-stat-card { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); border-radius:16px; padding:20px 18px; transition:0.3s; }
+        .fund-stat-card:hover { border-color:rgba(16,185,129,0.2); transform:translateY(-2px); }
+        .fund-stat-card .label { font-size:0.85rem; color:rgba(255,255,255,0.5); margin-bottom:4px; }
+        .fund-stat-card .value { font-size:2rem; font-weight:700; color:#fff; }
+        .fund-stat-card .value.green { color:#10b981; }
+        .fund-stat-card .value.blue { color:#3b82f6; }
+        .fund-stat-card .value.gold { color:#f59e0b; }
+        .fund-dept { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:20px; padding:24px 20px; margin-bottom:32px; }
+        .fund-dept h3 { font-size:1.1rem; font-weight:600; margin-bottom:16px; }
+        .fund-dept h3 i { color:#10b981; margin-right:8px; }
+        .dept-item { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.04); }
+        .dept-item:last-child { border-bottom:none; }
+        .dept-item .dept-name { min-width:120px; font-weight:500; color:rgba(255,255,255,0.8); font-size:0.9rem; }
+        .dept-item .dept-bar { flex:1; height:8px; background:rgba(255,255,255,0.06); border-radius:10px; overflow:hidden; }
+        .dept-item .dept-bar .fill { height:100%; border-radius:10px; transition:width 1s ease; }
+        .dept-item .dept-amount { min-width:80px; text-align:right; font-size:0.85rem; color:rgba(255,255,255,0.6); }
+        .fund-projects { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:20px; padding:24px 20px; }
+        .fund-projects h3 { font-size:1.1rem; font-weight:600; margin-bottom:16px; }
+        .fund-projects h3 i { color:#3b82f6; margin-right:8px; }
+        .project-item { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.04); flex-wrap:wrap; gap:8px; }
+        .project-item:last-child { border-bottom:none; }
+        .project-item .project-name { font-weight:500; color:#fff; font-size:0.95rem; }
+        .project-item .project-meta { font-size:0.8rem; color:rgba(255,255,255,0.4); }
+        .project-status { padding:3px 12px; border-radius:20px; font-size:0.7rem; font-weight:600; text-transform:uppercase; }
+        .project-status.on-track { background:rgba(16,185,129,0.15); color:#10b981; }
+        .project-status.delayed { background:rgba(239,68,68,0.15); color:#ef4444; }
+        .project-status.completed { background:rgba(59,130,246,0.15); color:#3b82f6; }
+        .project-status.pending { background:rgba(245,158,11,0.15); color:#f59e0b; }
+    </style>
+</head>
+<body>
+    <div id="three-canvas"></div>
+    <div class="app-overlay">
+        <header>
+            <div class="container nav-inner">
+                <a href="index.html" class="logo"><i class="fas fa-gavel"></i><span>SOLVIT</span></a>
+                <div class="nav-links" id="mainNav"></div>
+            </div>
+        </header>
+        <section class="fund-section">
+            <div class="container">
+                <div class="fund-header">
+                    <h2>💰 Fund Transparency</h2>
+                    <p>Track government spending, budgets, and project allocations in real-time.</p>
+                </div>
+                <div class="fund-stats" id="fundStats">
+                    <div class="fund-stat-card"><div class="label">Total Budget</div><div class="value gold" id="totalBudget">₹0</div></div>
+                    <div class="fund-stat-card"><div class="label">Total Spent</div><div class="value blue" id="totalSpent">₹0</div></div>
+                    <div class="fund-stat-card"><div class="label">Remaining</div><div class="value green" id="remainingBudget">₹0</div></div>
+                    <div class="fund-stat-card"><div class="label">Projects</div><div class="value" id="totalProjects" style="color:#8b5cf6;">0</div></div>
+                </div>
+                <div class="fund-dept">
+                    <h3><i class="fas fa-building"></i> Department-wise Budget</h3>
+                    <div id="deptList"></div>
+                </div>
+                <div class="fund-projects">
+                    <h3><i class="fas fa-project-diagram"></i> Active Projects</h3>
+                    <div id="projectsList"></div>
+                </div>
+            </div>
+        </section>
+        <footer class="footer" style="margin-top:0;">
+            <div class="container">
+                <div class="footer-grid">
+                    <div class="footer-brand"><div class="logo"><i class="fas fa-gavel"></i><span>SOLVIT</span></div><p>Smart Governance. One Platform. For 1.4 Billion.</p><div class="social-links"><a href="#"><i class="fab fa-twitter"></i></a><a href="#"><i class="fab fa-linkedin-in"></i></a><a href="#"><i class="fab fa-github"></i></a><a href="#"><i class="fab fa-youtube"></i></a></div></div>
+                    <div class="footer-links"><h4>Services</h4><a href="services.html">Complaint Management</a><a href="services.html">Petition Portal</a><a href="services.html">Land & Revenue</a></div>
+                    <div class="footer-links"><h4>Company</h4><a href="#">About Us</a><a href="#">Careers</a></div>
+                    <div class="footer-links"><h4>Legal</h4><a href="#">Privacy Policy</a><a href="#">Terms</a></div>
+                </div>
+                <div class="footer-bottom"><p>&copy; 2026 SOLVIT. All rights reserved.</p></div>
+            </div>
+        </footer>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="../script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let fundData = JSON.parse(localStorage.getItem('solvit_fund_data'));
+            if (!fundData) {
+                fundData = {
+                    totalBudget: 5932.23, totalSpent: 4200.50,
+                    departments: [
+                        { name: 'Health', budget: 850.00, spent: 620.30 },
+                        { name: 'Education', budget: 750.00, spent: 580.10 },
+                        { name: 'Roads', budget: 500.00, spent: 490.80 },
+                        { name: 'Water Supply', budget: 400.00, spent: 310.40 },
+                        { name: 'Agriculture', budget: 300.00, spent: 190.20 }
+                    ],
+                    projects: [
+                        { name: 'New Hospital Construction', budget: 15.00, spent: 11.25, status: 'on-track' },
+                        { name: 'School Renovation', budget: 8.50, spent: 8.50, status: 'completed' },
+                        { name: 'Bridge Repair', budget: 12.00, spent: 6.00, status: 'delayed' },
+                        { name: 'Water Treatment Plant', budget: 25.00, spent: 18.00, status: 'on-track' }
+                    ]
+                };
+                localStorage.setItem('solvit_fund_data', JSON.stringify(fundData));
+            }
+
+            document.getElementById('totalBudget').textContent = '₹' + fundData.totalBudget.toFixed(2) + ' Cr';
+            document.getElementById('totalSpent').textContent = '₹' + fundData.totalSpent.toFixed(2) + ' Cr';
+            document.getElementById('remainingBudget').textContent = '₹' + (fundData.totalBudget - fundData.totalSpent).toFixed(2) + ' Cr';
+            document.getElementById('totalProjects').textContent = fundData.projects.length;
+
+            const deptContainer = document.getElementById('deptList');
+            if (fundData.departments.length > 0) {
+                let html = '';
+                fundData.departments.forEach(d => {
+                    const pct = Math.min((d.spent / d.budget) * 100, 100);
+                    const color = pct > 90 ? '#ef4444' : pct > 70 ? '#f59e0b' : '#10b981';
+                    html += `<div class="dept-item"><span class="dept-name">${d.name}</span><div class="dept-bar"><div class="fill" style="width:${pct}%; background:${color};"></div></div><span class="dept-amount">₹${d.spent.toFixed(2)}Cr / ₹${d.budget.toFixed(2)}Cr</span></div>`;
+                });
+                deptContainer.innerHTML = html;
+            }
+
+            const projContainer = document.getElementById('projectsList');
+            if (fundData.projects.length > 0) {
+                let html = '';
+                fundData.projects.forEach(p => {
+                    const statusLabel = p.status.replace('-', ' ').toUpperCase();
+                    html += `<div class="project-item"><div><div class="project-name">${p.name}</div><div class="project-meta">Budget: ₹${p.budget.toFixed(2)}Cr · Spent: ₹${p.spent.toFixed(2)}Cr</div></div><span class="project-status ${p.status}">${statusLabel}</span></div>`;
+                });
+                projContainer.innerHTML = html;
+            }
+        });
+    </script>
+</body>
+</html>

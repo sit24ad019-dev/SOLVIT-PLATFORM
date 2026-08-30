@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SOLVIT - Project Monitoring</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="../style.css" />
+    <style>
+        .project-section { padding:40px 0 60px; }
+        .project-header h2 { font-family:'Playfair Display',serif; font-size:2rem; margin-bottom:4px; }
+        .project-header p { color:rgba(255,255,255,0.5); margin-bottom:30px; }
+        .project-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:16px; margin-bottom:32px; }
+        .project-stat-card { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); border-radius:16px; padding:16px 18px; text-align:center; transition:0.3s; }
+        .project-stat-card:hover { border-color:rgba(59,130,246,0.2); transform:translateY(-2px); }
+        .project-stat-card .number { font-size:2rem; font-weight:700; color:#fff; }
+        .project-stat-card .number.blue { color:#3b82f6; }
+        .project-stat-card .number.green { color:#10b981; }
+        .project-stat-card .number.yellow { color:#f59e0b; }
+        .project-stat-card .number.red { color:#ef4444; }
+        .project-stat-card .label { font-size:0.8rem; color:rgba(255,255,255,0.5); margin-top:4px; }
+        .project-list { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:20px; padding:24px 20px; }
+        .project-list h3 { font-size:1.1rem; font-weight:600; margin-bottom:16px; }
+        .project-list h3 i { color:#3b82f6; margin-right:8px; }
+        .project-card { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05); border-radius:16px; padding:18px 20px; margin-bottom:14px; transition:0.3s; }
+        .project-card:last-child { margin-bottom:0; }
+        .project-card:hover { border-color:rgba(59,130,246,0.2); }
+        .project-card .project-title { font-weight:600; font-size:1.05rem; color:#fff; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; }
+        .project-card .project-title .status-badge { font-size:0.65rem; font-weight:600; text-transform:uppercase; padding:3px 14px; border-radius:20px; }
+        .status-badge.on-track { background:rgba(16,185,129,0.15); color:#10b981; }
+        .status-badge.delayed { background:rgba(239,68,68,0.15); color:#ef4444; }
+        .status-badge.completed { background:rgba(59,130,246,0.15); color:#3b82f6; }
+        .status-badge.pending { background:rgba(245,158,11,0.15); color:#f59e0b; }
+        .project-card .project-details { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:8px 20px; margin-top:8px; font-size:0.85rem; color:rgba(255,255,255,0.6); }
+        .project-card .project-details span { display:flex; align-items:center; gap:6px; }
+        .project-card .project-details i { width:16px; color:#3b82f6; }
+        .progress-container { margin-top:10px; display:flex; align-items:center; gap:12px; }
+        .progress-bar { flex:1; height:8px; background:rgba(255,255,255,0.06); border-radius:10px; overflow:hidden; }
+        .progress-bar .fill { height:100%; border-radius:10px; transition:width 1s ease; }
+        .progress-text { font-size:0.85rem; font-weight:600; color:rgba(255,255,255,0.7); min-width:45px; }
+    </style>
+</head>
+<body>
+    <div id="three-canvas"></div>
+    <div class="app-overlay">
+        <header>
+            <div class="container nav-inner">
+                <a href="index.html" class="logo"><i class="fas fa-gavel"></i><span>SOLVIT</span></a>
+                <div class="nav-links" id="mainNav"></div>
+            </div>
+        </header>
+        <section class="project-section">
+            <div class="container">
+                <div class="project-header">
+                    <h2>📈 Project Monitoring</h2>
+                    <p>Track government project progress live with milestone updates.</p>
+                </div>
+                <div class="project-stats" id="projectStats">
+                    <div class="project-stat-card"><div class="number blue" id="totalProjects">0</div><div class="label">Total Projects</div></div>
+                    <div class="project-stat-card"><div class="number green" id="completedProjects">0</div><div class="label">Completed</div></div>
+                    <div class="project-stat-card"><div class="number yellow" id="inProgressProjects">0</div><div class="label">In Progress</div></div>
+                    <div class="project-stat-card"><div class="number red" id="delayedProjects">0</div><div class="label">Delayed</div></div>
+                </div>
+                <div class="project-list">
+                    <h3><i class="fas fa-list"></i> All Projects</h3>
+                    <div id="projectsContainer"></div>
+                </div>
+            </div>
+        </section>
+        <footer class="footer" style="margin-top:0;">
+            <div class="container">
+                <div class="footer-grid">
+                    <div class="footer-brand"><div class="logo"><i class="fas fa-gavel"></i><span>SOLVIT</span></div><p>Smart Governance. One Platform. For 1.4 Billion.</p><div class="social-links"><a href="#"><i class="fab fa-twitter"></i></a><a href="#"><i class="fab fa-linkedin-in"></i></a><a href="#"><i class="fab fa-github"></i></a><a href="#"><i class="fab fa-youtube"></i></a></div></div>
+                    <div class="footer-links"><h4>Services</h4><a href="services.html">Complaint Management</a><a href="services.html">Petition Portal</a><a href="services.html">Land & Revenue</a></div>
+                    <div class="footer-links"><h4>Company</h4><a href="#">About Us</a><a href="#">Careers</a></div>
+                    <div class="footer-links"><h4>Legal</h4><a href="#">Privacy Policy</a><a href="#">Terms</a></div>
+                </div>
+                <div class="footer-bottom"><p>&copy; 2026 SOLVIT. All rights reserved.</p></div>
+            </div>
+        </footer>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="../script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let projectData = JSON.parse(localStorage.getItem('solvit_project_data'));
+            if (!projectData) {
+                projectData = [
+                    { id: 'PRJ-001', name: 'New Hospital Construction', dept: 'Health', budget: '₹15 Cr', progress: 75, status: 'on-track', contractor: 'ABC Constructions', timeline: 'Dec 2024 - Jun 2026' },
+                    { id: 'PRJ-002', name: 'School Renovation Program', dept: 'Education', budget: '₹8.5 Cr', progress: 100, status: 'completed', contractor: 'XYZ Builders', timeline: 'Jan 2025 - Mar 2026' },
+                    { id: 'PRJ-003', name: 'Bridge Repair & Maintenance', dept: 'Roads', budget: '₹12 Cr', progress: 45, status: 'delayed', contractor: 'PQR Infra', timeline: 'Feb 2025 - Aug 2026' },
+                    { id: 'PRJ-004', name: 'Water Treatment Plant', dept: 'Water Supply', budget: '₹25 Cr', progress: 72, status: 'on-track', contractor: 'LMN Developers', timeline: 'Mar 2025 - Dec 2026' }
+                ];
+                localStorage.setItem('solvit_project_data', JSON.stringify(projectData));
+            }
+
+            const total = projectData.length;
+            const completed = projectData.filter(p => p.status === 'completed').length;
+            const inProgress = projectData.filter(p => p.status === 'on-track' || p.status === 'pending').length;
+            const delayed = projectData.filter(p => p.status === 'delayed').length;
+
+            document.getElementById('totalProjects').textContent = total;
+            document.getElementById('completedProjects').textContent = completed;
+            document.getElementById('inProgressProjects').textContent = inProgress;
+            document.getElementById('delayedProjects').textContent = delayed;
+
+            const container = document.getElementById('projectsContainer');
+            if (projectData.length > 0) {
+                let html = '';
+                projectData.forEach(p => {
+                    const progressColor = p.progress >= 80 ? '#10b981' : p.progress >= 50 ? '#3b82f6' : p.progress >= 30 ? '#f59e0b' : '#ef4444';
+                    html += `
+                        <div class="project-card">
+                            <div class="project-title">
+                                <span>${p.name}</span>
+                                <span class="status-badge ${p.status}">${p.status.replace('-',' ').toUpperCase()}</span>
+                            </div>
+                            <div class="project-details">
+                                <span><i class="fas fa-building"></i> ${p.dept}</span>
+                                <span><i class="fas fa-coins"></i> ${p.budget}</span>
+                                <span><i class="fas fa-user-tie"></i> ${p.contractor}</span>
+                                <span><i class="fas fa-calendar-alt"></i> ${p.timeline}</span>
+                            </div>
+                            <div class="progress-container">
+                                <span class="progress-text">${p.progress}%</span>
+                                <div class="progress-bar">
+                                    <div class="fill" style="width:${p.progress}%; background:${progressColor};"></div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            }
+        });
+    </script>
+</body>
+</html>

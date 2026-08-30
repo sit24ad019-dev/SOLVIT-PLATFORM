@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SOLVIT - Corruption Reporting</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="../style.css" />
+    <style>
+        .anonymous-badge { display:inline-block; background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.2); padding:4px 16px; border-radius:20px; font-size:0.8rem; font-weight:600; color:#ef4444; margin-bottom:16px; }
+        .anonymous-info { background:rgba(239,68,68,0.05); border-left:3px solid #ef4444; padding:12px 16px; border-radius:8px; margin-bottom:20px; font-size:0.9rem; color:rgba(255,255,255,0.6); }
+        .anonymous-info i { color:#ef4444; margin-right:8px; }
+    </style>
+</head>
+<body>
+    <div id="three-canvas"></div>
+    <div class="app-overlay">
+        <header>
+            <div class="container nav-inner">
+                <a href="index.html" class="logo"><i class="fas fa-gavel"></i><span>SOLVIT</span></a>
+                <div class="nav-links" id="mainNav"></div>
+            </div>
+        </header>
+        <section class="form-section">
+            <div class="container">
+                <div class="form-card">
+                    <h2>🛡️ Corruption Reporting</h2>
+                    <p class="subtitle">Report corruption anonymously with whistleblower protection.</p>
+                    <div class="anonymous-badge"><i class="fas fa-user-secret"></i> Anonymous Reporting</div>
+                    <div class="anonymous-info"><i class="fas fa-shield-alt"></i> Your identity is protected. Reports are encrypted and only seen by authorized investigators.</div>
+                    <div id="formAlert" class="alert"></div>
+                    <form id="corruptionForm">
+                        <div class="form-group">
+                            <label for="reportType">Type of Corruption <span class="required-star">*</span></label>
+                            <select id="reportType" required>
+                                <option value="">Select Type</option>
+                                <option value="Bribery">Bribery</option>
+                                <option value="Fund Misuse">Fund Misuse</option>
+                                <option value="Illegal Construction">Illegal Construction</option>
+                                <option value="Land Grabbing">Land Grabbing</option>
+                                <option value="Fake Documents">Fake Documents</option>
+                                <option value="Procurement Fraud">Procurement Fraud</option>
+                                <option value="Tax Evasion">Tax Evasion</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="involvedParty">Department / Officer Involved <span class="required-star">*</span></label>
+                            <input type="text" id="involvedParty" placeholder="Name of department or officer" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="reportDescription">Description of Incident <span class="required-star">*</span></label>
+                            <textarea id="reportDescription" placeholder="Provide detailed information about the corruption incident." required></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="incidentDate">Date of Incident <span class="required-star">*</span></label>
+                                <input type="date" id="incidentDate" required />
+                            </div>
+                            <div class="form-group">
+                                <label for="incidentTime">Time of Incident</label>
+                                <input type="time" id="incidentTime" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="reportLocation">Location (GPS / Manual) <span class="required-star">*</span></label>
+                            <div class="location-wrapper">
+                                <input type="text" id="reportLocation" placeholder="Click 'Get Location' or type manually" required />
+                                <button type="button" id="getLocationBtn" class="get-location-btn"><i class="fas fa-location-dot"></i> Get Location</button>
+                            </div>
+                            <div class="hint">Capture GPS location or enter address manually.</div>
+                            <input type="hidden" id="latitude" />
+                            <input type="hidden" id="longitude" />
+                        </div>
+                        <div class="form-group">
+                            <label for="district">District <span class="required-star">*</span></label>
+                            <input type="text" id="district" placeholder="Enter your district" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="evidenceFiles">Upload Evidence <span class="required-star">*</span></label>
+                            <label for="evidenceFiles" class="file-upload-btn"><i class="fas fa-file-upload"></i> Choose Files</label>
+                            <input type="file" id="evidenceFiles" accept="image/*,video/*,.pdf,.doc,.docx" style="display:none;" multiple required />
+                            <span id="fileNames" style="color:rgba(255,255,255,0.5); font-size:0.85rem; margin-left:10px;">No files chosen</span>
+                            <div class="hint">Upload photos, videos, documents (PDF, Word, etc.)</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="contactInfo">Contact Information <span style="color:#f59e0b;">(optional)</span></label>
+                            <input type="text" id="contactInfo" placeholder="Email or phone (optional - for follow-up)" />
+                            <div class="hint">Optional: Leave a way to contact you for clarifications.</div>
+                        </div>
+                        <button type="submit" class="btn-submit">🚀 Submit Report</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+        <footer class="footer" style="margin-top:0;">
+            <div class="container">
+                <div class="footer-grid">
+                    <div class="footer-brand"><div class="logo"><i class="fas fa-gavel"></i><span>SOLVIT</span></div><p>Smart Governance. One Platform. For 1.4 Billion.</p><div class="social-links"><a href="#"><i class="fab fa-twitter"></i></a><a href="#"><i class="fab fa-linkedin-in"></i></a><a href="#"><i class="fab fa-github"></i></a><a href="#"><i class="fab fa-youtube"></i></a></div></div>
+                    <div class="footer-links"><h4>Services</h4><a href="services.html">Complaint Management</a><a href="services.html">Petition Portal</a><a href="services.html">Land & Revenue</a></div>
+                    <div class="footer-links"><h4>Company</h4><a href="#">About Us</a><a href="#">Careers</a></div>
+                    <div class="footer-links"><h4>Legal</h4><a href="#">Privacy Policy</a><a href="#">Terms</a></div>
+                </div>
+                <div class="footer-bottom"><p>&copy; 2026 SOLVIT. All rights reserved.</p></div>
+            </div>
+        </footer>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="../script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('evidenceFiles').addEventListener('change', function(e) {
+                const files = this.files; let names = [];
+                for (let i = 0; i < files.length; i++) names.push(files[i].name);
+                document.getElementById('fileNames').textContent = names.length > 0 ? names.join(', ') : 'No files chosen';
+            });
+            getCurrentLocation('getLocationBtn', 'reportLocation', 'latitude', 'longitude');
+
+            document.getElementById('corruptionForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const session = JSON.parse(localStorage.getItem('solvit_session'));
+                if (!session || !session.id) { showAlert('Please login to submit a report.', 'error'); return; }
+
+                const reportType = document.getElementById('reportType').value;
+                const involvedParty = document.getElementById('involvedParty').value.trim();
+                const description = document.getElementById('reportDescription').value.trim();
+                const incidentDate = document.getElementById('incidentDate').value;
+                const incidentTime = document.getElementById('incidentTime').value;
+                const location = document.getElementById('reportLocation').value.trim();
+                const district = document.getElementById('district').value.trim();
+                const contactInfo = document.getElementById('contactInfo').value.trim();
+                const lat = document.getElementById('latitude').value;
+                const lng = document.getElementById('longitude').value;
+                const files = document.getElementById('evidenceFiles').files;
+
+                if (!reportType || !involvedParty || !description || !incidentDate || !location || !district) { showAlert('Please fill in all required fields.', 'error'); return; }
+                if (!lat || !lng) { showAlert('Please capture your GPS location.', 'error'); return; }
+                if (files.length === 0) { showAlert('Please upload at least one evidence file (mandatory).', 'error'); return; }
+
+                const fileNames = [];
+                for (let i = 0; i < files.length; i++) fileNames.push(files[i].name);
+
+                const reportData = {
+                    id: 'COR-' + Date.now(),
+                    reportType, involvedParty, description,
+                    incidentDate, incidentTime: incidentTime || 'N/A',
+                    location, district,
+                    latitude: lat, longitude: lng,
+                    contactInfo: contactInfo || 'Anonymous',
+                    evidence: fileNames,
+                    status: 'Under Investigation',
+                    createdAt: new Date().toISOString(),
+                    userId: session.id,
+                    userName: session.name,
+                    timeline: [{ status: 'Reported', date: new Date().toISOString(), remark: 'Corruption report submitted anonymously.' }]
+                };
+
+                fetch('http://localhost:5000/api/corruption', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(reportData)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert('✅ Report submitted anonymously! Redirecting to Dashboard...', 'success');
+                        document.getElementById('corruptionForm').reset();
+                        document.getElementById('fileNames').textContent = 'No files chosen';
+                        document.getElementById('latitude').value = '';
+                        document.getElementById('longitude').value = '';
+                        setTimeout(() => window.location.href = 'dashboard.html', 1500);
+                    } else {
+                        showAlert('Submission failed: ' + (data.error || 'Unknown error'), 'error');
+                    }
+                })
+                .catch(err => { console.error('Error:', err); showAlert('Network error. Please try again.', 'error'); });
+            });
+
+            function showAlert(msg, type) {
+                const alertDiv = document.getElementById('formAlert');
+                alertDiv.textContent = msg;
+                alertDiv.className = 'alert ' + type;
+                setTimeout(() => alertDiv.className = 'alert', 5000);
+            }
+        });
+    </script>
+</body>
+</html>
