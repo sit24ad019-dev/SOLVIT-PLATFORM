@@ -113,7 +113,7 @@
                     timeline: [{ status: 'Reported', date: new Date().toISOString(), remark: 'Police complaint filed successfully.' }]
                 };
 
-                fetch('http://localhost:5000/api/safety-complaints', {
+                fetch('https://solvit-platform.onrender.com/api/safety-complaints', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(complaintData)

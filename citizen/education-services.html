@@ -118,7 +118,7 @@
                     timeline: [{ status: 'Reported', date: new Date().toISOString(), remark: 'Education issue reported successfully.' }]
                 };
 
-                fetch('http://localhost:5000/api/education-reports', {
+                fetch('https://solvit-platform.onrender.com/api/education-reports', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(reportData)

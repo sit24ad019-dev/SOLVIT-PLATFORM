@@ -113,7 +113,7 @@
                     timeline: [{ status: 'Reported', date: new Date().toISOString(), remark: 'Health issue reported successfully.' }]
                 };
 
-                fetch('http://localhost:5000/api/health-reports', {
+                fetch('https://solvit-platform.onrender.com/api/health-reports', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(reportData)

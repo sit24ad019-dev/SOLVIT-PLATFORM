@@ -156,7 +156,7 @@
                     timeline: [{ status: 'Reported', date: new Date().toISOString(), remark: 'Corruption report submitted anonymously.' }]
                 };
 
-                fetch('http://localhost:5000/api/corruption', {
+                fetch('https://solvit-platform.onrender.com/api/corruption', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(reportData)

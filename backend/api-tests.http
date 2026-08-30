@@ -1,11 +1,11 @@
 ### ─── HEALTH CHECK ───
-GET http://localhost:5000/api/health
+GET https://solvit-platform.onrender.com/api/health
 
 ### ─── GET ALL USERS ───
-GET http://localhost:5000/api/users
+GET https://solvit-platform.onrender.com/api/users
 
 ### ─── REGISTER A USER ───
-POST http://localhost:5000/api/users/register
+POST https://solvit-platform.onrender.com/api/users/register
 Content-Type: application/json
 
 {
@@ -22,7 +22,7 @@ Content-Type: application/json
 }
 
 ### ─── LOGIN ───
-POST http://localhost:5000/api/users/login
+POST https://solvit-platform.onrender.com/api/users/login
 Content-Type: application/json
 
 {
@@ -32,10 +32,10 @@ Content-Type: application/json
 }
 
 ### ─── GET ALL COMPLAINTS ───
-GET http://localhost:5000/api/complaints
+GET https://solvit-platform.onrender.com/api/complaints
 
 ### ─── CREATE A COMPLAINT ───
-POST http://localhost:5000/api/complaints
+POST https://solvit-platform.onrender.com/api/complaints
 Content-Type: application/json
 
 {
@@ -60,10 +60,10 @@ Content-Type: application/json
 }
 
 ### ─── GET ALL PETITIONS ───
-GET http://localhost:5000/api/petitions
+GET https://solvit-platform.onrender.com/api/petitions
 
 ### ─── CREATE A PETITION ───
-POST http://localhost:5000/api/petitions
+POST https://solvit-platform.onrender.com/api/petitions
 Content-Type: application/json
 
 {
@@ -81,10 +81,10 @@ Content-Type: application/json
 }
 
 ### ─── GET ALL LAND APPLICATIONS ───
-GET http://localhost:5000/api/land
+GET https://solvit-platform.onrender.com/api/land
 
 ### ─── CREATE LAND APPLICATION ───
-POST http://localhost:5000/api/land
+POST https://solvit-platform.onrender.com/api/land
 Content-Type: application/json
 
 {
@@ -102,25 +102,25 @@ Content-Type: application/json
 }
 
 ### ─── GET ALL RTI REQUESTS ───
-GET http://localhost:5000/api/rti
+GET https://solvit-platform.onrender.com/api/rti
 
 ### ─── GET ALL HEALTH REPORTS ───
-GET http://localhost:5000/api/health-reports
+GET https://solvit-platform.onrender.com/api/health-reports
 
 ### ─── GET ALL EDUCATION REPORTS ───
-GET http://localhost:5000/api/education-reports
+GET https://solvit-platform.onrender.com/api/education-reports
 
 ### ─── GET ALL SAFETY COMPLAINTS ───
-GET http://localhost:5000/api/safety-complaints
+GET https://solvit-platform.onrender.com/api/safety-complaints
 
 ### ─── GET ALL AGRICULTURE APPLICATIONS ───
-GET http://localhost:5000/api/agriculture
+GET https://solvit-platform.onrender.com/api/agriculture
 
 ### ─── GET ALL LOAN APPLICATIONS ───
-GET http://localhost:5000/api/loan
+GET https://solvit-platform.onrender.com/api/loan
 
 ### ─── GET ALL CORRUPTION REPORTS ───
-GET http://localhost:5000/api/corruption
+GET https://solvit-platform.onrender.com/api/corruption
 
 ### ─── GET ALL INFRASTRUCTURE REPORTS ───
-GET http://localhost:5000/api/infrastructure
+GET https://solvit-platform.onrender.com/api/infrastructure

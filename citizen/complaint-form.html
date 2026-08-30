@@ -155,7 +155,7 @@
                 };
 
                 // ─── SEND TO BACKEND API ───
-                fetch('http://localhost:5000/api/complaints', {
+                fetch('https://solvit-platform.onrender.com/api/complaints', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(complaintData)
