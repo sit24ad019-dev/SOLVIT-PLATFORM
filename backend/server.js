@@ -1,7 +1,4 @@
 // ─── server.js ───
-
-require('dotenv').config();
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/solvit';
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
@@ -15,7 +12,8 @@ app.use(cors());
 app.use(express.json());
 
 // ─── MONGODB CONNECTION ───
-const MONGODB_URI = 'mongodb://localhost:27017/solvit';
+require('dotenv').config();
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/solvit';
 
 mongoose.connect(MONGODB_URI)
 .then(() => console.log('✅ Connected to MongoDB successfully!'))
