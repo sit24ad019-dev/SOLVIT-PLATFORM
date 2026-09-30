@@ -409,7 +409,7 @@
     <script src="../script.js"></script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
 
             // ─── GET APPLICATION ID FROM URL ───
             const urlParams = new URLSearchParams(window.location.search);
@@ -428,22 +428,24 @@
             }
 
             // ─── SERVICE KEY MAPPING ───
-            const serviceKeys = {
-                complaint: 'solvit_complaints',
-                petition: 'solvit_petitions',
-                land: 'solvit_land_applications',
-                rti: 'solvit_rti_requests',
-                health: 'solvit_health_reports',
-                education: 'solvit_edu_reports',
-                safety: 'solvit_safety_complaints',
-                agriculture: 'solvit_agri_applications',
-                loan: 'solvit_loan_applications',
-                corruption: 'solvit_corruption_reports',
-                infrastructure: 'solvit_infra_reports'
+            const services = {
+                complaint: { endpoint: '/complaints', storageKey: 'solvit_complaints', label: 'Complaint' },
+                complaints: { endpoint: '/complaints', storageKey: 'solvit_complaints', label: 'Complaint' },
+                petition: { endpoint: '/petitions', storageKey: 'solvit_petitions', label: 'Petition' },
+                petitions: { endpoint: '/petitions', storageKey: 'solvit_petitions', label: 'Petition' },
+                land: { endpoint: '/land', storageKey: 'solvit_land_applications', label: 'Land' },
+                rti: { endpoint: '/rti', storageKey: 'solvit_rti_requests', label: 'RTI' },
+                health: { endpoint: '/health-reports', storageKey: 'solvit_health_reports', label: 'Health' },
+                education: { endpoint: '/education-reports', storageKey: 'solvit_edu_reports', label: 'Education' },
+                safety: { endpoint: '/safety-complaints', storageKey: 'solvit_safety_complaints', label: 'Safety' },
+                agriculture: { endpoint: '/agriculture', storageKey: 'solvit_agri_applications', label: 'Agriculture' },
+                loan: { endpoint: '/loan', storageKey: 'solvit_loan_applications', label: 'Loan' },
+                corruption: { endpoint: '/corruption', storageKey: 'solvit_corruption_reports', label: 'Corruption' },
+                infrastructure: { endpoint: '/infrastructure', storageKey: 'solvit_infra_reports', label: 'Infrastructure' }
             };
 
-            const key = serviceKeys[service];
-            if (!key) {
+            const serviceConfig = services[service];
+            if (!serviceConfig) {
                 container.innerHTML = `
                     <h2 style="color:#ef4444;">❌ Error</h2>
                     <p style="color:rgba(255,255,255,0.5);">Invalid service type.</p>
@@ -453,13 +455,37 @@
             }
 
             // ─── FETCH DATA ───
-            const allItems = JSON.parse(localStorage.getItem(key)) || [];
-            const item = allItems.find(i => i.id === appId);
+            const API_BASE = 'https://solvit-platform.onrender.com/api';
+            let item;
+            let apiAvailable = false;
+
+            try {
+                const response = await fetch(`${API_BASE}${serviceConfig.endpoint}`);
+                if (!response.ok) throw new Error(`API returned ${response.status}`);
+                apiAvailable = true;
+                const allItems = await response.json();
+                if (Array.isArray(allItems)) {
+                    item = allItems.find(record => String(record.id) === appId);
+                }
+            } catch (error) {
+                console.error('Unable to fetch application from API:', error);
+            }
+
+            if (!item) {
+                try {
+                    const storedItems = JSON.parse(localStorage.getItem(serviceConfig.storageKey) || '[]');
+                    if (Array.isArray(storedItems)) {
+                        item = storedItems.find(record => String(record.id) === appId);
+                    }
+                } catch (error) {
+                    console.error('Unable to read locally stored applications:', error);
+                }
+            }
 
             if (!item) {
                 container.innerHTML = `
-                    <h2 style="color:#ef4444;">❌ Not Found</h2>
-                    <p style="color:rgba(255,255,255,0.5);">Application not found.</p>
+                    <h2 style="color:#ef4444;">❌ ${apiAvailable ? 'Not Found' : 'Unable to Load'}</h2>
+                    <p style="color:rgba(255,255,255,0.5);">${apiAvailable ? 'Application not found.' : 'Could not reach the application service. Please try again later.'}</p>
                     <a href="dashboard.html" class="btn-back">⬅ Back to Dashboard</a>
                 `;
                 return;
@@ -535,7 +561,7 @@
             html += `<a href="dashboard.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>`;
             html += `<div class="app-id">Application ID: <span>${item.id}</span></div>`;
             html += `<h2>${item.title || 'Application'}</h2>`;
-            html += `<div class="app-category"><i class="fas fa-tag"></i> ${item.category || service.charAt(0).toUpperCase() + service.slice(1)}</div>`;
+            html += `<div class="app-category"><i class="fas fa-tag"></i> ${item.category || serviceConfig.label}</div>`;
 
             // ─── PROGRESS STEPS ───
             html += `<div class="progress-container">`;
@@ -590,7 +616,7 @@
             // ─── DETAILS GRID ───
             html += `<div class="details-grid">`;
             html += `
-                <div class="item"><div class="label">Service</div><div class="value">${service.charAt(0).toUpperCase() + service.slice(1)}</div></div>
+                <div class="item"><div class="label">Service</div><div class="value">${serviceConfig.label}</div></div>
                 <div class="item"><div class="label">Category</div><div class="value">${item.category || 'N/A'}</div></div>
                 <div class="item"><div class="label">Submitted On</div><div class="value">${new Date(item.createdAt || Date.now()).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' })}</div></div>
                 <div class="item"><div class="label">Current Status</div><div class="value" style="color:#3b82f6;">${item.status || 'Submitted'}</div></div>
