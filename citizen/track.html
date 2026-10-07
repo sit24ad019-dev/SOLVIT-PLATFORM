@@ -16,6 +16,7 @@
         .track-card .app-id span { color: #f59e0b; font-weight: 600; }
         .track-card h2 { font-family: 'Playfair Display', serif; font-size: 1.8rem; margin-bottom: 2px; color: #fff; }
         .track-card .app-category { display: inline-block; background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.2); padding: 3px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; color: #3b82f6; margin-bottom: 24px; }
+
         .progress-container { margin: 30px 0 24px; padding: 0 10px; }
         .steps-row { display: flex; justify-content: space-between; align-items: flex-start; position: relative; padding: 0 10px; }
         .steps-row::before { content: ''; position: absolute; top: 18px; left: 25px; right: 25px; height: 3px; background: rgba(255,255,255,0.08); z-index: 0; }
@@ -23,18 +24,21 @@
         .steps-row .step .circle { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.05); border: 3px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; color: rgba(255,255,255,0.2); transition: 0.4s; position: relative; }
         .steps-row .step .circle.active { background: #3b82f6; border-color: #3b82f6; color: #fff; box-shadow: 0 0 30px rgba(59,130,246,0.3); }
         .steps-row .step .circle.completed { background: #10b981; border-color: #10b981; color: #fff; box-shadow: 0 0 20px rgba(16,185,129,0.2); }
-        .steps-row .step .label { font-size: 0.75rem; font-weight: 500; color: rgba(255,255,255,0.3); margin-top: 8px; text-align: center; letter-spacing: 0.3px; transition: 0.3s; }
+        .steps-row .step .label { font-size: 0.75rem; font-weight: 500; color: rgba(255,255,255,0.3); margin-top: 8px; text-align: center; transition: 0.3s; }
         .steps-row .step .label.active { color: #fff; font-weight: 600; }
         .steps-row .step .label.completed { color: #10b981; }
+
         .status-message { background: rgba(59,130,246,0.05); border: 1px solid rgba(59,130,246,0.1); border-radius: 12px; padding: 16px 20px; margin: 16px 0 28px; display: flex; align-items: flex-start; gap: 12px; }
         .status-message .icon { font-size: 1.2rem; color: #3b82f6; margin-top: 2px; }
         .status-message .icon.completed { color: #10b981; }
         .status-message .icon.pending { color: #f59e0b; }
         .status-message .content .status-label { font-weight: 600; color: #fff; font-size: 1rem; }
         .status-message .content .status-desc { color: rgba(255,255,255,0.5); font-size: 0.9rem; margin-top: 2px; }
+
         .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; background: rgba(255,255,255,0.02); border-radius: 16px; padding: 16px 20px; margin-bottom: 24px; border: 1px solid rgba(255,255,255,0.04); }
         .details-grid .item .label { color: rgba(255,255,255,0.3); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; }
         .details-grid .item .value { font-weight: 500; color: #fff; font-size: 0.95rem; }
+
         .timeline-section { margin-top: 24px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 20px; }
         .timeline-section h4 { font-size: 1rem; font-weight: 600; margin-bottom: 16px; color: #fff; }
         .timeline-section h4 i { color: #3b82f6; margin-right: 8px; }
@@ -46,9 +50,27 @@
         .timeline-item .tl-content .tl-status { font-weight: 500; color: #fff; }
         .timeline-item .tl-content .tl-date { font-size: 0.75rem; color: rgba(255,255,255,0.3); }
         .timeline-item .tl-content .tl-remark { font-size: 0.85rem; color: rgba(255,255,255,0.4); margin-top: 2px; }
+
+        .blockchain-card { background: rgba(16,185,129,0.05); border: 1px solid rgba(16,185,129,0.15); border-radius: 12px; padding: 14px 18px; margin-top: 12px; }
+        .blockchain-card .bc-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .blockchain-card .bc-header i { color: #10b981; font-size: 1.2rem; }
+        .blockchain-card .bc-header span { font-weight: 600; color: #fff; }
+        .blockchain-card .bc-info { font-size: 0.8rem; color: rgba(255,255,255,0.5); line-height: 1.8; word-break: break-all; }
+        .blockchain-card .bc-info strong { color: rgba(255,255,255,0.7); }
+        .blockchain-card .bc-btn { margin-top: 12px; padding: 6px 16px; background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); border-radius: 20px; color: #10b981; font-weight: 600; cursor: pointer; font-size: 0.8rem; }
+        .blockchain-card .bc-btn:hover { background: #10b981; color: #fff; }
+
         .btn-back { display: inline-block; margin-top: 20px; padding: 10px 28px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); border-radius: 30px; color: #fff; font-weight: 600; text-decoration: none; transition: 0.3s; }
         .btn-back:hover { background: rgba(255,255,255,0.12); transform: translateY(-2px); }
-        @media (max-width: 600px) { .track-card { padding: 24px 18px; } .details-grid { grid-template-columns: 1fr; gap: 8px; } .steps-row .step .circle { width: 28px; height: 28px; font-size: 0.65rem; } .steps-row .step .label { font-size: 0.6rem; } }
+
+        @media (max-width: 600px) {
+            .track-card { padding: 24px 18px; }
+            .details-grid { grid-template-columns: 1fr; gap: 8px; }
+            .steps-row .step .circle { width: 28px; height: 28px; font-size: 0.65rem; }
+            .steps-row .step .label { font-size: 0.6rem; margin-top: 4px; }
+            .steps-row::before { top: 14px; left: 18px; right: 18px; }
+            .status-message { padding: 12px 16px; flex-direction: column; align-items: flex-start; }
+        }
     </style>
 </head>
 <body>
@@ -60,6 +82,7 @@
                 <div class="nav-links" id="mainNav"></div>
             </div>
         </header>
+
         <section class="track-section">
             <div class="container">
                 <div class="track-card" id="trackCard">
@@ -71,6 +94,7 @@
                 </div>
             </div>
         </section>
+
         <footer class="footer" style="margin-top: 0;">
             <div class="container">
                 <div class="footer-grid">
@@ -83,8 +107,10 @@
             </div>
         </footer>
     </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="../script.js"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const API_BASE = 'https://solvit-platform.onrender.com/api';
@@ -99,28 +125,30 @@
                 return;
             }
 
-            const endpointMap = {
-                complaint: '/complaints',
-                petition: '/petitions',
-                land: '/land',
-                rti: '/rti',
-                health: '/health-reports',
-                education: '/education-reports',
-                safety: '/safety-complaints',
-                agriculture: '/agriculture',
-                loan: '/loan',
-                corruption: '/corruption',
-                infrastructure: '/infrastructure'
+            const serviceConfig = {
+                complaint: { endpoint: '/complaints', label: 'Complaint' },
+                complaints: { endpoint: '/complaints', label: 'Complaint' },
+                petition: { endpoint: '/petitions', label: 'Petition' },
+                petitions: { endpoint: '/petitions', label: 'Petition' },
+                land: { endpoint: '/land', label: 'Land' },
+                rti: { endpoint: '/rti', label: 'RTI' },
+                health: { endpoint: '/health-reports', label: 'Health' },
+                education: { endpoint: '/education-reports', label: 'Education' },
+                safety: { endpoint: '/safety-complaints', label: 'Safety' },
+                agriculture: { endpoint: '/agriculture', label: 'Agriculture' },
+                loan: { endpoint: '/loan', label: 'Loan' },
+                corruption: { endpoint: '/corruption', label: 'Corruption' },
+                infrastructure: { endpoint: '/infrastructure', label: 'Infrastructure' }
             };
 
-            const endpoint = endpointMap[service];
-            if (!endpoint) {
+            const config = serviceConfig[service];
+            if (!config) {
                 container.innerHTML = `<h2 style="color:#ef4444;">❌ Error</h2><p style="color:rgba(255,255,255,0.5);">Invalid service type.</p><a href="dashboard.html" class="btn-back">⬅ Back to Dashboard</a>`;
                 return;
             }
 
             // ─── FETCH FROM API ───
-            fetch(`${API_BASE}${endpoint}`)
+            fetch(`${API_BASE}${config.endpoint}`)
             .then(res => res.json())
             .then(items => {
                 const item = items.find(i => i.id === appId);
@@ -128,22 +156,22 @@
                     container.innerHTML = `<h2 style="color:#ef4444;">❌ Not Found</h2><p style="color:rgba(255,255,255,0.5);">Application not found.</p><a href="dashboard.html" class="btn-back">⬅ Back to Dashboard</a>`;
                     return;
                 }
-                renderTracking(item);
+                renderTracking(item, config);
             })
             .catch(err => {
                 console.error('Error:', err);
                 container.innerHTML = `<h2 style="color:#ef4444;">❌ Network Error</h2><p style="color:rgba(255,255,255,0.5);">Could not load data.</p><a href="dashboard.html" class="btn-back">⬅ Back to Dashboard</a>`;
             });
 
-            // ─── RENDER ───
-            function renderTracking(item) {
+            // ─── RENDER FUNCTION ───
+            function renderTracking(item, config) {
                 function getStepFromStatus(status) {
                     if (!status) return 0;
                     const s = status.toLowerCase().trim();
                     const exactMap = {
                         'submitted': 0, 'reported': 0, 'active': 0, 'pending': 0, 'new': 0,
-                        'under review': 1, 'assigned': 1, 'under investigation': 1,
-                        'in progress': 2, 'progress': 2, 'processing': 2, 'funds released': 2,
+                        'under review': 1, 'assigned': 1, 'under investigation': 1, 'review': 1, 'investigation': 1,
+                        'in progress': 2, 'progress': 2, 'processing': 2, 'in-progress': 2, 'inprogress': 2, 'funds released': 2,
                         'resolved': 3, 'completed': 3, 'closed': 3, 'approved': 3, 'disbursed': 3, 'done': 3
                     };
                     if (exactMap[s] !== undefined) return exactMap[s];
@@ -172,7 +200,7 @@
                 html += `<a href="dashboard.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>`;
                 html += `<div class="app-id">Application ID: <span>${item.id}</span></div>`;
                 html += `<h2>${item.title || 'Application'}</h2>`;
-                html += `<div class="app-category"><i class="fas fa-tag"></i> ${item.category || service.charAt(0).toUpperCase() + service.slice(1)}</div>`;
+                html += `<div class="app-category"><i class="fas fa-tag"></i> ${item.category || config.label}</div>`;
 
                 // Progress steps
                 html += `<div class="progress-container"><div class="steps-row">`;
@@ -183,7 +211,13 @@
                         stepClass = 'completed';
                         icon = '<i class="fas fa-check"></i>';
                     } else if (idx === currentStep) {
-                        if (currentStep === 3 && (status.toLowerCase().includes('resolve') || status.toLowerCase().includes('complete') || status.toLowerCase().includes('closed') || status.toLowerCase().includes('approve') || status.toLowerCase().includes('disburse'))) {
+                        const isResolved = currentStep === 3 &&
+                            (status.toLowerCase().includes('resolve') ||
+                             status.toLowerCase().includes('complete') ||
+                             status.toLowerCase().includes('closed') ||
+                             status.toLowerCase().includes('approve') ||
+                             status.toLowerCase().includes('disburse'));
+                        if (isResolved) {
                             stepClass = 'completed';
                             icon = '<i class="fas fa-check"></i>';
                         } else {
@@ -209,20 +243,21 @@
                     </div>
                 `;
 
-                // Details
+                // Details grid
                 html += `<div class="details-grid">`;
-                html += `<div class="item"><div class="label">Service</div><div class="value">${service.charAt(0).toUpperCase() + service.slice(1)}</div></div>`;
+                html += `<div class="item"><div class="label">Service</div><div class="value">${config.label}</div></div>`;
                 html += `<div class="item"><div class="label">Category</div><div class="value">${item.category || 'N/A'}</div></div>`;
                 html += `<div class="item"><div class="label">Submitted On</div><div class="value">${new Date(item.createdAt || Date.now()).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' })}</div></div>`;
                 html += `<div class="item"><div class="label">Current Status</div><div class="value" style="color:#3b82f6;">${item.status || 'Submitted'}</div></div>`;
                 if (item.location) html += `<div class="item"><div class="label">Location</div><div class="value">${item.location}</div></div>`;
                 if (item.district) html += `<div class="item"><div class="label">District</div><div class="value">${item.district}</div></div>`;
+                if (item.assignedOfficer) html += `<div class="item"><div class="label">Assigned Officer</div><div class="value">${item.assignedOfficer}</div></div>`;
                 html += `</div>`;
 
                 // Timeline
                 html += `<div class="timeline-section"><h4><i class="fas fa-clock"></i> Activity Timeline</h4>`;
-                const sorted = [...timeline].sort((a, b) => new Date(a.date) - new Date(b.date));
-                sorted.forEach(t => {
+                const sortedTimeline = [...timeline].sort((a, b) => new Date(a.date) - new Date(b.date));
+                sortedTimeline.forEach(t => {
                     const dotClass = t.status === 'Resolved' || t.status === 'Closed' || t.status === 'Completed' ? 'completed' :
                                      t.status === 'In Progress' ? 'pending' : '';
                     html += `
@@ -238,21 +273,22 @@
                 });
                 html += `</div>`;
 
-                // Blockchain verification
+                // Blockchain verification card
                 if (item.blockchain) {
                     html += `
-                        <div class="timeline-section" style="margin-top:20px;">
+                        <div class="timeline-section">
                             <h4><i class="fas fa-link" style="color:#10b981;"></i> Blockchain Verification</h4>
-                            <div style="background:rgba(16,185,129,0.05);border:1px solid rgba(16,185,129,0.15);border-radius:12px;padding:14px 18px;">
-                                <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-                                    <i class="fas fa-check-circle" style="color:#10b981;font-size:1.2rem;"></i>
-                                    <span style="font-weight:600;color:#fff;">Verified on Blockchain</span>
+                            <div class="blockchain-card">
+                                <div class="bc-header">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Verified on Blockchain</span>
                                 </div>
-                                <div style="font-size:0.8rem;color:rgba(255,255,255,0.5);line-height:1.8;">
-                                    <div><strong style="color:rgba(255,255,255,0.7);">Transaction ID:</strong> ${item.blockchain.transactionId || 'N/A'}</div>
-                                    <div><strong style="color:rgba(255,255,255,0.7);">Block Number:</strong> #${item.blockchain.blockNumber || 'N/A'}</div>
+                                <div class="bc-info">
+                                    <div><strong>Transaction ID:</strong> ${item.blockchain.transactionId || 'N/A'}</div>
+                                    <div><strong>Block Number:</strong> #${item.blockchain.blockNumber || 'N/A'}</div>
+                                    <div><strong>Hash:</strong> ${item.blockchain.hash || 'N/A'}</div>
                                 </div>
-                                <button onclick="verifyBlockchain('${item.id}')" style="margin-top:12px;padding:6px 16px;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);border-radius:20px;color:#10b981;font-weight:600;cursor:pointer;font-size:0.8rem;">
+                                <button class="bc-btn" onclick="verifyBlockchain('${item.id}')">
                                     <i class="fas fa-shield-alt"></i> Verify on Blockchain
                                 </button>
                             </div>
@@ -265,17 +301,21 @@
                 container.innerHTML = html;
             }
 
+            // ─── VERIFY BLOCKCHAIN ───
             window.verifyBlockchain = function(complaintId) {
                 fetch(`${API_BASE}/complaints/${complaintId}/verify`)
                 .then(res => res.json())
                 .then(data => {
                     if (data.verified) {
-                        alert(`✅ Blockchain Verified!\n\nTotal blocks: ${data.totalBlocks}\nAll hashes valid: ✅\nChain integrity: ✅`);
+                        alert(`✅ Blockchain Verified!\n\nTotal blocks: ${data.totalBlocks}\nAll hashes valid: ✅\nChain integrity: ✅\n\nThe record has not been tampered with.`);
                     } else {
-                        alert(`⚠️ Blockchain verification failed!`);
+                        alert(`⚠️ Blockchain verification failed!\n\nSome records may have been modified.`);
                     }
                 })
-                .catch(err => alert('Unable to verify.'));
+                .catch(err => {
+                    console.error('Verification error:', err);
+                    alert('Unable to verify. Please try again.');
+                });
             };
         });
     </script>
