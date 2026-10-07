@@ -321,6 +321,28 @@ app.get('/api/complaints', async (req, res) => {
     }
 });
 
+// ─── CHECK FOR DUPLICATES (Haversine) ───
+app.post('/api/complaints/check-duplicate', async (req, res) => {
+    try {
+        const { category, latitude, longitude } = req.body;
+
+        if (!latitude || !longitude) {
+            return res.json({ duplicates: [] });
+        }
+
+        const nearby = await findNearbyComplaints(
+            { category, latitude, longitude },
+            50, // 50 meters
+            30  // last 30 days
+        );
+
+        res.json({ duplicates: nearby });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ─── CREATE COMPLAINT ───
 app.post('/api/complaints', async (req, res) => {
     try {
         const complaint = new Complaint(req.body);
@@ -330,7 +352,6 @@ app.post('/api/complaints', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
-
 app.put('/api/complaints/:id', async (req, res) => {
     try {
         const complaint = await Complaint.findOneAndUpdate(
@@ -673,6 +694,61 @@ app.put('/api/infrastructure/:id', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+
+// ─── HAVERSINE ALGORITHM ───
+// Calculates distance between two GPS coordinates in meters
+function haversineDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371000; // Earth's radius in meters
+    const toRad = (deg) => deg * Math.PI / 180;
+
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c;
+
+    return distance; // in meters
+}
+
+// ─── DUPLICATE DETECTION ───
+// Checks for similar complaints within a radius (default 50m)
+async function findNearbyComplaints(newComplaint, radiusMeters = 50, daysBack = 30) {
+    const since = new Date();
+    since.setDate(since.getDate() - daysBack);
+
+    const existing = await Complaint.find({
+        category: newComplaint.category,
+        createdAt: { $gte: since }
+    });
+
+    const nearby = [];
+    for (const c of existing) {
+        if (!c.latitude || !c.longitude) continue;
+
+        const dist = haversineDistance(
+            parseFloat(newComplaint.latitude),
+            parseFloat(newComplaint.longitude),
+            parseFloat(c.latitude),
+            parseFloat(c.longitude)
+        );
+
+        if (dist <= radiusMeters) {
+            nearby.push({
+                id: c.id,
+                title: c.title,
+                distance: Math.round(dist),
+                createdAt: c.createdAt,
+                status: c.status
+            });
+        }
+    }
+
+    return nearby.sort((a, b) => a.distance - b.distance);
+}
 
 // ─── ROOT ───
 app.get('/', (req, res) => {
