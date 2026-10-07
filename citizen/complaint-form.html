@@ -68,7 +68,7 @@
             line-height: 1.5;
         }
         .dup-list {
-            max-height: 200px;
+            max-height: 250px;
             overflow-y: auto;
             margin-bottom: 20px;
         }
@@ -97,10 +97,10 @@
             flex-wrap: wrap;
         }
         .dup-btn {
-            padding: 6px 16px;
+            padding: 8px 18px;
             border: none;
             border-radius: 20px;
-            font-size: 0.78rem;
+            font-size: 0.8rem;
             font-weight: 600;
             cursor: pointer;
             transition: 0.3s;
@@ -123,33 +123,21 @@
             gap: 10px;
             flex-wrap: wrap;
         }
-        .dup-modal-footer button {
+        .dup-modal-footer .dup-btn-close {
             flex: 1;
-            min-width: 130px;
             padding: 12px;
             border-radius: 12px;
             font-weight: 600;
             font-size: 0.9rem;
             cursor: pointer;
             transition: 0.3s;
-            border: none;
-        }
-        .dup-btn-cancel {
             background: rgba(255, 255, 255, 0.06);
             border: 1px solid rgba(255, 255, 255, 0.1);
             color: rgba(255, 255, 255, 0.7);
         }
-        .dup-btn-cancel:hover {
+        .dup-modal-footer .dup-btn-close:hover {
             background: rgba(255, 255, 255, 0.12);
             color: #fff;
-        }
-        .dup-btn-submit {
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-            color: #fff;
-        }
-        .dup-btn-submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
         }
     </style>
 </head>
@@ -241,12 +229,11 @@
     <div class="dup-modal-overlay" id="dupModal">
         <div class="dup-modal">
             <div class="icon-wrap"><i class="fas fa-exclamation-triangle"></i></div>
-            <h3>Duplicate Complaint Found</h3>
-            <p class="msg">There is already a complaint record near this location. You can track the existing complaint or submit anyway.</p>
+            <h3>This Complaint Is Already Reported</h3>
+            <p class="msg">A similar complaint has already been reported near this location. You can track the existing complaint below.</p>
             <div class="dup-list" id="dupList"></div>
             <div class="dup-modal-footer">
-                <button class="dup-btn-cancel" onclick="closeDupModal()">Cancel</button>
-                <button class="dup-btn-submit" onclick="proceedSubmit()">Submit Anyway</button>
+                <button class="dup-btn-close" onclick="closeDupModal()">Close</button>
             </div>
         </div>
     </div>
@@ -256,7 +243,6 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const API_BASE = 'https://solvit-platform.onrender.com/api';
-            let pendingComplaintData = null;
 
             showFileName('complaintMedia', 'imageFileName');
             getCurrentLocation('getLocationBtn', 'complaintLocation', 'latitude', 'longitude');
@@ -280,21 +266,6 @@
                 if (!mediaFile) { showAlert('Please upload a photo (mandatory).', 'error'); return; }
                 if (!lat || !lng) { showAlert('Please capture your GPS location.', 'error'); return; }
 
-                // Build complaint object
-                pendingComplaintData = {
-                    id: 'CMP-' + Date.now(),
-                    title, description, category, location, district,
-                    latitude: lat, longitude: lng,
-                    status: 'Submitted',
-                    createdAt: new Date().toISOString(),
-                    userId: session.id,
-                    userName: session.name,
-                    media: mediaFile.name,
-                    timeline: [
-                        { status: 'Submitted', date: new Date().toISOString(), remark: 'Complaint submitted successfully.' }
-                    ]
-                };
-
                 // ─── HAVERSINE DUPLICATE CHECK ───
                 try {
                     const dupRes = await fetch(`${API_BASE}/complaints/check-duplicate`, {
@@ -305,15 +276,16 @@
                     const dupData = await dupRes.json();
 
                     if (dupData.duplicates && dupData.duplicates.length > 0) {
+                        // Show duplicate modal — do NOT submit
                         showDupModal(dupData.duplicates);
                         return;
                     }
                 } catch (err) {
-                    console.log('Duplicate check failed, proceeding anyway.', err);
+                    console.log('Duplicate check failed, proceeding.', err);
                 }
 
-                // No duplicates → submit directly
-                submitComplaint(pendingComplaintData);
+                // No duplicates → proceed to submit
+                submitComplaint({ title, description, category, location, district, mediaFile, lat, lng, session });
             });
 
             // ─── SHOW DUPLICATE MODAL ───
@@ -346,16 +318,22 @@
                 document.getElementById('dupModal').classList.remove('show');
             };
 
-            // ─── SUBMIT ANYWAY ───
-            window.proceedSubmit = function() {
-                document.getElementById('dupModal').classList.remove('show');
-                if (pendingComplaintData) {
-                    submitComplaint(pendingComplaintData);
-                }
-            };
-
             // ─── SUBMIT COMPLAINT ───
-            function submitComplaint(complaintData) {
+            function submitComplaint({ title, description, category, location, district, mediaFile, lat, lng, session }) {
+                const complaintData = {
+                    id: 'CMP-' + Date.now(),
+                    title, description, category, location, district,
+                    latitude: lat, longitude: lng,
+                    status: 'Submitted',
+                    createdAt: new Date().toISOString(),
+                    userId: session.id,
+                    userName: session.name,
+                    media: mediaFile.name,
+                    timeline: [
+                        { status: 'Submitted', date: new Date().toISOString(), remark: 'Complaint submitted successfully.' }
+                    ]
+                };
+
                 fetch(`${API_BASE}/complaints`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
