@@ -95,12 +95,12 @@
     <script src="../script.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // ─── HELPERS ───
+            const API_BASE = 'https://solvit-platform.onrender.com/api';
+
             showFileName('complaintMedia', 'imageFileName');
             getCurrentLocation('getLocationBtn', 'complaintLocation', 'latitude', 'longitude');
 
-            // ─── FORM SUBMISSION ───
-            document.getElementById('complaintForm').addEventListener('submit', function(e) {
+            document.getElementById('complaintForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
 
                 const session = JSON.parse(localStorage.getItem('solvit_session'));
@@ -131,6 +131,35 @@
                     return;
                 }
 
+                // ─── HAVERSINE DUPLICATE CHECK ───
+                try {
+                    const dupRes = await fetch(`${API_BASE}/complaints/check-duplicate`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ category, latitude: lat, longitude: lng })
+                    });
+                    const dupData = await dupRes.json();
+
+                    if (dupData.duplicates && dupData.duplicates.length > 0) {
+                        const list = dupData.duplicates
+                            .map(d => `• "${d.title}" (${d.distance}m away, status: ${d.status})`)
+                            .join('\n');
+
+                        const proceed = confirm(
+                            `⚠️ Similar complaints found nearby:\n\n${list}\n\n` +
+                            `Do you still want to submit a new complaint?`
+                        );
+
+                        if (!proceed) {
+                            showAlert('Complaint cancelled. You can upvote an existing one.', 'error');
+                            return;
+                        }
+                    }
+                } catch (err) {
+                    console.log('Duplicate check failed, proceeding anyway.', err);
+                }
+
+                // ─── SUBMIT COMPLAINT ───
                 const complaintData = {
                     id: 'CMP-' + Date.now(),
                     title,
@@ -154,8 +183,7 @@
                     ]
                 };
 
-                // ─── SEND TO BACKEND API ───
-                fetch('https://solvit-platform.onrender.com/api/complaints', {
+                fetch(`${API_BASE}/complaints`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(complaintData)
