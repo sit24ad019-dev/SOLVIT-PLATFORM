@@ -59,9 +59,19 @@ function createBlock(complaint, previousHash = '0') {
 }
 
 function verifyBlock(block) {
-    const { hash, ...blockData } = block;
+    // Recreate the exact same object that was originally hashed
+    const blockData = {
+        complaintId: block.complaintId,
+        trackingId: block.trackingId,
+        title: block.title,
+        category: block.category,
+        status: block.status,
+        userId: block.userId,
+        timestamp: block.timestamp,
+        previousHash: block.previousHash
+    };
     const recomputedHash = generateHash(blockData);
-    return recomputedHash === hash;
+    return recomputedHash === block.hash;
 }
 
 // ─── SCHEMAS ───
