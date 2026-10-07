@@ -12,12 +12,29 @@ app.use(cors());
 app.use(express.json());
 
 // ─── MONGODB CONNECTION ───
-require('dotenv').config();
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/solvit';
 
 mongoose.connect(MONGODB_URI)
 .then(() => console.log('✅ Connected to MongoDB successfully!'))
 .catch((err) => console.error('❌ MongoDB connection error:', err));
+
+// ─── HELPER: Generate unique tracking ID ───
+function generateTrackingId(prefix = 'TRK') {
+    return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+}
+
+// ─── HAVERSINE ALGORITHM ───
+function haversineDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371000;
+    const toRad = (deg) => deg * Math.PI / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+}
 
 // ─── SCHEMAS ───
 
@@ -41,6 +58,7 @@ const User = mongoose.model('User', userSchema);
 // 2. Complaint Schema
 const complaintSchema = new mongoose.Schema({
     id: String,
+    trackingId: { type: String, unique: true, sparse: true },
     title: String,
     description: String,
     category: String,
@@ -62,6 +80,7 @@ const Complaint = mongoose.model('Complaint', complaintSchema);
 // 3. Petition Schema
 const petitionSchema = new mongoose.Schema({
     id: String,
+    trackingId: { type: String, unique: true, sparse: true },
     title: String,
     description: String,
     category: String,
@@ -85,6 +104,7 @@ const Petition = mongoose.model('Petition', petitionSchema);
 // 4. Land Application Schema
 const landSchema = new mongoose.Schema({
     id: String,
+    trackingId: { type: String, unique: true, sparse: true },
     surveyNumber: String,
     ownerName: String,
     propertyType: String,
@@ -106,6 +126,7 @@ const LandApplication = mongoose.model('LandApplication', landSchema);
 // 5. RTI Schema
 const rtiSchema = new mongoose.Schema({
     id: String,
+    trackingId: { type: String, unique: true, sparse: true },
     department: String,
     question: String,
     reason: String,
@@ -125,6 +146,7 @@ const RTIRequest = mongoose.model('RTIRequest', rtiSchema);
 // 6. Health Report Schema
 const healthSchema = new mongoose.Schema({
     id: String,
+    trackingId: { type: String, unique: true, sparse: true },
     type: String,
     description: String,
     location: String,
@@ -143,6 +165,7 @@ const HealthReport = mongoose.model('HealthReport', healthSchema);
 // 7. Education Report Schema
 const educationSchema = new mongoose.Schema({
     id: String,
+    trackingId: { type: String, unique: true, sparse: true },
     schoolName: String,
     issueType: String,
     description: String,
@@ -162,6 +185,7 @@ const EducationReport = mongoose.model('EducationReport', educationSchema);
 // 8. Safety Complaint Schema
 const safetySchema = new mongoose.Schema({
     id: String,
+    trackingId: { type: String, unique: true, sparse: true },
     incidentType: String,
     description: String,
     location: String,
@@ -180,6 +204,7 @@ const SafetyComplaint = mongoose.model('SafetyComplaint', safetySchema);
 // 9. Agriculture Application Schema
 const agricultureSchema = new mongoose.Schema({
     id: String,
+    trackingId: { type: String, unique: true, sparse: true },
     farmerName: String,
     aadhaar: String,
     cropType: String,
@@ -202,6 +227,7 @@ const AgricultureApplication = mongoose.model('AgricultureApplication', agricult
 // 10. Loan Waiver Schema
 const loanSchema = new mongoose.Schema({
     id: String,
+    trackingId: { type: String, unique: true, sparse: true },
     aadhaar: String,
     farmerName: String,
     mobile: String,
@@ -227,6 +253,7 @@ const LoanApplication = mongoose.model('LoanApplication', loanSchema);
 // 11. Corruption Report Schema
 const corruptionSchema = new mongoose.Schema({
     id: String,
+    trackingId: { type: String, unique: true, sparse: true },
     reportType: String,
     involvedParty: String,
     description: String,
@@ -249,6 +276,7 @@ const CorruptionReport = mongoose.model('CorruptionReport', corruptionSchema);
 // 12. Infrastructure Report Schema
 const infrastructureSchema = new mongoose.Schema({
     id: String,
+    trackingId: { type: String, unique: true, sparse: true },
     type: String,
     subType: String,
     description: String,
@@ -292,11 +320,9 @@ app.post('/api/users/register', async (req, res) => {
     }
 });
 
-// ─── UPDATED LOGIN ROUTE (supports email OR mobile) ───
 app.post('/api/users/login', async (req, res) => {
     try {
         const { identifier, password, role } = req.body;
-        // Check if identifier matches either email or mobile
         const user = await User.findOne({
             $or: [{ email: identifier }, { mobile: identifier }],
             password,
@@ -321,37 +347,57 @@ app.get('/api/complaints', async (req, res) => {
     }
 });
 
-// ─── CHECK FOR DUPLICATES (Haversine) ───
+// Check duplicates (Haversine)
 app.post('/api/complaints/check-duplicate', async (req, res) => {
     try {
         const { category, latitude, longitude } = req.body;
-
         if (!latitude || !longitude) {
             return res.json({ duplicates: [] });
         }
-
-        const nearby = await findNearbyComplaints(
-            { category, latitude, longitude },
-            50, // 50 meters
-            30  // last 30 days
-        );
-
+        const since = new Date();
+        since.setDate(since.getDate() - 30);
+        const existing = await Complaint.find({
+            category,
+            createdAt: { $gte: since }
+        });
+        const nearby = [];
+        for (const c of existing) {
+            if (!c.latitude || !c.longitude) continue;
+            const dist = haversineDistance(
+                parseFloat(latitude), parseFloat(longitude),
+                parseFloat(c.latitude), parseFloat(c.longitude)
+            );
+            if (dist <= 50) {
+                nearby.push({
+                    id: c.id,
+                    title: c.title,
+                    distance: Math.round(dist),
+                    createdAt: c.createdAt,
+                    status: c.status
+                });
+            }
+        }
+        nearby.sort((a, b) => a.distance - b.distance);
         res.json({ duplicates: nearby });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// ─── CREATE COMPLAINT ───
 app.post('/api/complaints', async (req, res) => {
     try {
-        const complaint = new Complaint(req.body);
+        const data = req.body;
+        if (!data.trackingId) {
+            data.trackingId = generateTrackingId('TRK');
+        }
+        const complaint = new Complaint(data);
         await complaint.save();
         res.json({ success: true, complaint });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
+
 app.put('/api/complaints/:id', async (req, res) => {
     try {
         const complaint = await Complaint.findOneAndUpdate(
@@ -377,7 +423,9 @@ app.get('/api/petitions', async (req, res) => {
 
 app.post('/api/petitions', async (req, res) => {
     try {
-        const petition = new Petition(req.body);
+        const data = req.body;
+        if (!data.trackingId) data.trackingId = generateTrackingId('PET');
+        const petition = new Petition(data);
         await petition.save();
         res.json({ success: true, petition });
     } catch (err) {
@@ -388,9 +436,7 @@ app.post('/api/petitions', async (req, res) => {
 app.put('/api/petitions/:id', async (req, res) => {
     try {
         const petition = await Petition.findOneAndUpdate(
-            { id: req.params.id },
-            req.body,
-            { new: true }
+            { id: req.params.id }, req.body, { new: true }
         );
         res.json({ success: true, petition });
     } catch (err) {
@@ -398,7 +444,7 @@ app.put('/api/petitions/:id', async (req, res) => {
     }
 });
 
-// ─── LAND APPLICATIONS ───
+// ─── LAND ───
 app.get('/api/land', async (req, res) => {
     try {
         const apps = await LandApplication.find();
@@ -410,7 +456,9 @@ app.get('/api/land', async (req, res) => {
 
 app.post('/api/land', async (req, res) => {
     try {
-        const app = new LandApplication(req.body);
+        const data = req.body;
+        if (!data.trackingId) data.trackingId = generateTrackingId('LND');
+        const app = new LandApplication(data);
         await app.save();
         res.json({ success: true, app });
     } catch (err) {
@@ -421,9 +469,7 @@ app.post('/api/land', async (req, res) => {
 app.put('/api/land/:id', async (req, res) => {
     try {
         const app = await LandApplication.findOneAndUpdate(
-            { id: req.params.id },
-            req.body,
-            { new: true }
+            { id: req.params.id }, req.body, { new: true }
         );
         res.json({ success: true, app });
     } catch (err) {
@@ -431,7 +477,7 @@ app.put('/api/land/:id', async (req, res) => {
     }
 });
 
-// ─── RTI REQUESTS ───
+// ─── RTI ───
 app.get('/api/rti', async (req, res) => {
     try {
         const rtis = await RTIRequest.find();
@@ -443,7 +489,9 @@ app.get('/api/rti', async (req, res) => {
 
 app.post('/api/rti', async (req, res) => {
     try {
-        const rti = new RTIRequest(req.body);
+        const data = req.body;
+        if (!data.trackingId) data.trackingId = generateTrackingId('RTI');
+        const rti = new RTIRequest(data);
         await rti.save();
         res.json({ success: true, rti });
     } catch (err) {
@@ -454,9 +502,7 @@ app.post('/api/rti', async (req, res) => {
 app.put('/api/rti/:id', async (req, res) => {
     try {
         const rti = await RTIRequest.findOneAndUpdate(
-            { id: req.params.id },
-            req.body,
-            { new: true }
+            { id: req.params.id }, req.body, { new: true }
         );
         res.json({ success: true, rti });
     } catch (err) {
@@ -476,7 +522,9 @@ app.get('/api/health-reports', async (req, res) => {
 
 app.post('/api/health-reports', async (req, res) => {
     try {
-        const report = new HealthReport(req.body);
+        const data = req.body;
+        if (!data.trackingId) data.trackingId = generateTrackingId('HLT');
+        const report = new HealthReport(data);
         await report.save();
         res.json({ success: true, report });
     } catch (err) {
@@ -487,9 +535,7 @@ app.post('/api/health-reports', async (req, res) => {
 app.put('/api/health-reports/:id', async (req, res) => {
     try {
         const report = await HealthReport.findOneAndUpdate(
-            { id: req.params.id },
-            req.body,
-            { new: true }
+            { id: req.params.id }, req.body, { new: true }
         );
         res.json({ success: true, report });
     } catch (err) {
@@ -509,7 +555,9 @@ app.get('/api/education-reports', async (req, res) => {
 
 app.post('/api/education-reports', async (req, res) => {
     try {
-        const report = new EducationReport(req.body);
+        const data = req.body;
+        if (!data.trackingId) data.trackingId = generateTrackingId('EDU');
+        const report = new EducationReport(data);
         await report.save();
         res.json({ success: true, report });
     } catch (err) {
@@ -520,9 +568,7 @@ app.post('/api/education-reports', async (req, res) => {
 app.put('/api/education-reports/:id', async (req, res) => {
     try {
         const report = await EducationReport.findOneAndUpdate(
-            { id: req.params.id },
-            req.body,
-            { new: true }
+            { id: req.params.id }, req.body, { new: true }
         );
         res.json({ success: true, report });
     } catch (err) {
@@ -542,7 +588,9 @@ app.get('/api/safety-complaints', async (req, res) => {
 
 app.post('/api/safety-complaints', async (req, res) => {
     try {
-        const complaint = new SafetyComplaint(req.body);
+        const data = req.body;
+        if (!data.trackingId) data.trackingId = generateTrackingId('SAF');
+        const complaint = new SafetyComplaint(data);
         await complaint.save();
         res.json({ success: true, complaint });
     } catch (err) {
@@ -553,9 +601,7 @@ app.post('/api/safety-complaints', async (req, res) => {
 app.put('/api/safety-complaints/:id', async (req, res) => {
     try {
         const complaint = await SafetyComplaint.findOneAndUpdate(
-            { id: req.params.id },
-            req.body,
-            { new: true }
+            { id: req.params.id }, req.body, { new: true }
         );
         res.json({ success: true, complaint });
     } catch (err) {
@@ -563,7 +609,7 @@ app.put('/api/safety-complaints/:id', async (req, res) => {
     }
 });
 
-// ─── AGRICULTURE APPLICATIONS ───
+// ─── AGRICULTURE ───
 app.get('/api/agriculture', async (req, res) => {
     try {
         const apps = await AgricultureApplication.find();
@@ -575,7 +621,9 @@ app.get('/api/agriculture', async (req, res) => {
 
 app.post('/api/agriculture', async (req, res) => {
     try {
-        const app = new AgricultureApplication(req.body);
+        const data = req.body;
+        if (!data.trackingId) data.trackingId = generateTrackingId('AGR');
+        const app = new AgricultureApplication(data);
         await app.save();
         res.json({ success: true, app });
     } catch (err) {
@@ -586,9 +634,7 @@ app.post('/api/agriculture', async (req, res) => {
 app.put('/api/agriculture/:id', async (req, res) => {
     try {
         const app = await AgricultureApplication.findOneAndUpdate(
-            { id: req.params.id },
-            req.body,
-            { new: true }
+            { id: req.params.id }, req.body, { new: true }
         );
         res.json({ success: true, app });
     } catch (err) {
@@ -596,7 +642,7 @@ app.put('/api/agriculture/:id', async (req, res) => {
     }
 });
 
-// ─── LOAN APPLICATIONS ───
+// ─── LOAN ───
 app.get('/api/loan', async (req, res) => {
     try {
         const apps = await LoanApplication.find();
@@ -608,7 +654,9 @@ app.get('/api/loan', async (req, res) => {
 
 app.post('/api/loan', async (req, res) => {
     try {
-        const app = new LoanApplication(req.body);
+        const data = req.body;
+        if (!data.trackingId) data.trackingId = generateTrackingId('LNW');
+        const app = new LoanApplication(data);
         await app.save();
         res.json({ success: true, app });
     } catch (err) {
@@ -619,9 +667,7 @@ app.post('/api/loan', async (req, res) => {
 app.put('/api/loan/:id', async (req, res) => {
     try {
         const app = await LoanApplication.findOneAndUpdate(
-            { id: req.params.id },
-            req.body,
-            { new: true }
+            { id: req.params.id }, req.body, { new: true }
         );
         res.json({ success: true, app });
     } catch (err) {
@@ -629,7 +675,7 @@ app.put('/api/loan/:id', async (req, res) => {
     }
 });
 
-// ─── CORRUPTION REPORTS ───
+// ─── CORRUPTION ───
 app.get('/api/corruption', async (req, res) => {
     try {
         const reports = await CorruptionReport.find();
@@ -641,7 +687,9 @@ app.get('/api/corruption', async (req, res) => {
 
 app.post('/api/corruption', async (req, res) => {
     try {
-        const report = new CorruptionReport(req.body);
+        const data = req.body;
+        if (!data.trackingId) data.trackingId = generateTrackingId('COR');
+        const report = new CorruptionReport(data);
         await report.save();
         res.json({ success: true, report });
     } catch (err) {
@@ -652,9 +700,7 @@ app.post('/api/corruption', async (req, res) => {
 app.put('/api/corruption/:id', async (req, res) => {
     try {
         const report = await CorruptionReport.findOneAndUpdate(
-            { id: req.params.id },
-            req.body,
-            { new: true }
+            { id: req.params.id }, req.body, { new: true }
         );
         res.json({ success: true, report });
     } catch (err) {
@@ -662,7 +708,7 @@ app.put('/api/corruption/:id', async (req, res) => {
     }
 });
 
-// ─── INFRASTRUCTURE REPORTS ───
+// ─── INFRASTRUCTURE ───
 app.get('/api/infrastructure', async (req, res) => {
     try {
         const reports = await InfrastructureReport.find();
@@ -674,7 +720,9 @@ app.get('/api/infrastructure', async (req, res) => {
 
 app.post('/api/infrastructure', async (req, res) => {
     try {
-        const report = new InfrastructureReport(req.body);
+        const data = req.body;
+        if (!data.trackingId) data.trackingId = generateTrackingId('INF');
+        const report = new InfrastructureReport(data);
         await report.save();
         res.json({ success: true, report });
     } catch (err) {
@@ -685,70 +733,13 @@ app.post('/api/infrastructure', async (req, res) => {
 app.put('/api/infrastructure/:id', async (req, res) => {
     try {
         const report = await InfrastructureReport.findOneAndUpdate(
-            { id: req.params.id },
-            req.body,
-            { new: true }
+            { id: req.params.id }, req.body, { new: true }
         );
         res.json({ success: true, report });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
-
-// ─── HAVERSINE ALGORITHM ───
-// Calculates distance between two GPS coordinates in meters
-function haversineDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371000; // Earth's radius in meters
-    const toRad = (deg) => deg * Math.PI / 180;
-
-    const dLat = toRad(lat2 - lat1);
-    const dLon = toRad(lon2 - lon1);
-
-    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-              Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-              Math.sin(dLon / 2) * Math.sin(dLon / 2);
-
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const distance = R * c;
-
-    return distance; // in meters
-}
-
-// ─── DUPLICATE DETECTION ───
-// Checks for similar complaints within a radius (default 50m)
-async function findNearbyComplaints(newComplaint, radiusMeters = 50, daysBack = 30) {
-    const since = new Date();
-    since.setDate(since.getDate() - daysBack);
-
-    const existing = await Complaint.find({
-        category: newComplaint.category,
-        createdAt: { $gte: since }
-    });
-
-    const nearby = [];
-    for (const c of existing) {
-        if (!c.latitude || !c.longitude) continue;
-
-        const dist = haversineDistance(
-            parseFloat(newComplaint.latitude),
-            parseFloat(newComplaint.longitude),
-            parseFloat(c.latitude),
-            parseFloat(c.longitude)
-        );
-
-        if (dist <= radiusMeters) {
-            nearby.push({
-                id: c.id,
-                title: c.title,
-                distance: Math.round(dist),
-                createdAt: c.createdAt,
-                status: c.status
-            });
-        }
-    }
-
-    return nearby.sort((a, b) => a.distance - b.distance);
-}
 
 // ─── ROOT ───
 app.get('/', (req, res) => {
@@ -757,5 +748,5 @@ app.get('/', (req, res) => {
 
 // ─── START SERVER ───
 app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
+    console.log(`🚀 Server running on port ${PORT}`);
 });
