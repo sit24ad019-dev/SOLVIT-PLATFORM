@@ -3,6 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const crypto = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -36,6 +37,33 @@ function haversineDistance(lat1, lon1, lat2, lon2) {
     return R * c;
 }
 
+// ─── BLOCKCHAIN UTILITIES ───
+function generateHash(data) {
+    const jsonString = JSON.stringify(data);
+    return crypto.createHash('sha256').update(jsonString).digest('hex');
+}
+
+function createBlock(complaint, previousHash = '0') {
+    const blockData = {
+        complaintId: complaint.id,
+        trackingId: complaint.trackingId,
+        title: complaint.title,
+        category: complaint.category,
+        status: complaint.status,
+        userId: complaint.userId,
+        timestamp: new Date().toISOString(),
+        previousHash: previousHash
+    };
+    const hash = generateHash(blockData);
+    return { ...blockData, hash };
+}
+
+function verifyBlock(block) {
+    const { hash, ...blockData } = block;
+    const recomputedHash = generateHash(blockData);
+    return recomputedHash === hash;
+}
+
 // ─── SCHEMAS ───
 
 // 1. User Schema
@@ -55,7 +83,7 @@ const userSchema = new mongoose.Schema({
 });
 const User = mongoose.model('User', userSchema);
 
-// 2. Complaint Schema
+// 2. Complaint Schema (with Blockchain)
 const complaintSchema = new mongoose.Schema({
     id: String,
     trackingId: { type: String, unique: true, sparse: true },
@@ -73,7 +101,14 @@ const complaintSchema = new mongoose.Schema({
     media: String,
     timeline: Array,
     assignedOfficer: String,
-    assignedDepartment: String
+    assignedDepartment: String,
+    blockchain: {
+        transactionId: String,
+        previousHash: String,
+        hash: String,
+        blockNumber: Number
+    },
+    blockchainHistory: Array
 });
 const Complaint = mongoose.model('Complaint', complaintSchema);
 
@@ -295,7 +330,6 @@ const InfrastructureReport = mongoose.model('InfrastructureReport', infrastructu
 
 // ─── API ROUTES ───
 
-// Health check
 app.get('/api/health', (req, res) => {
     res.json({ status: 'OK', message: 'SOLVIT API is running!' });
 });
@@ -337,7 +371,7 @@ app.post('/api/users/login', async (req, res) => {
     }
 });
 
-// ─── COMPLAINTS ───
+// ─── COMPLAINTS (with Haversine + Blockchain) ───
 app.get('/api/complaints', async (req, res) => {
     try {
         const complaints = await Complaint.find();
@@ -347,7 +381,7 @@ app.get('/api/complaints', async (req, res) => {
     }
 });
 
-// Check duplicates (Haversine)
+// Duplicate check (Haversine)
 app.post('/api/complaints/check-duplicate', async (req, res) => {
     try {
         const { category, latitude, longitude } = req.body;
@@ -384,12 +418,30 @@ app.post('/api/complaints/check-duplicate', async (req, res) => {
     }
 });
 
+// Create complaint with blockchain
 app.post('/api/complaints', async (req, res) => {
     try {
         const data = req.body;
         if (!data.trackingId) {
             data.trackingId = generateTrackingId('TRK');
         }
+
+        // Create blockchain block
+        const blockNumber = await Complaint.countDocuments() + 1;
+        const lastComplaint = await Complaint.findOne().sort({ 'blockchain.blockNumber': -1 });
+        const previousHash = lastComplaint?.blockchain?.hash || '0';
+
+        const block = createBlock(data, previousHash);
+        block.blockNumber = blockNumber;
+
+        data.blockchain = {
+            transactionId: '0x' + block.hash.substring(0, 40),
+            previousHash: previousHash,
+            hash: block.hash,
+            blockNumber: blockNumber
+        };
+        data.blockchainHistory = [block];
+
         const complaint = new Complaint(data);
         await complaint.save();
         res.json({ success: true, complaint });
@@ -398,14 +450,84 @@ app.post('/api/complaints', async (req, res) => {
     }
 });
 
+// Update complaint with blockchain
 app.put('/api/complaints/:id', async (req, res) => {
     try {
+        const existing = await Complaint.findOne({ id: req.params.id });
+        if (!existing) {
+            return res.status(404).json({ error: 'Complaint not found' });
+        }
+
+        const updateData = req.body;
+
+        if (updateData.status && updateData.status !== existing.status) {
+            const history = existing.blockchainHistory || [];
+            const previousHash = history.length > 0
+                ? history[history.length - 1].hash
+                : (existing.blockchain?.hash || '0');
+
+            const block = createBlock(
+                { ...existing.toObject(), ...updateData },
+                previousHash
+            );
+            block.blockNumber = (existing.blockchain?.blockNumber || 0) + 1;
+            block.statusChange = {
+                from: existing.status,
+                to: updateData.status
+            };
+
+            history.push(block);
+            updateData.blockchainHistory = history;
+            updateData.blockchain = {
+                transactionId: '0x' + block.hash.substring(0, 40),
+                previousHash: previousHash,
+                hash: block.hash,
+                blockNumber: block.blockNumber
+            };
+        }
+
         const complaint = await Complaint.findOneAndUpdate(
             { id: req.params.id },
-            req.body,
+            updateData,
             { new: true }
         );
         res.json({ success: true, complaint });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Verify blockchain
+app.get('/api/complaints/:id/verify', async (req, res) => {
+    try {
+        const complaint = await Complaint.findOne({ id: req.params.id });
+        if (!complaint) {
+            return res.status(404).json({ error: 'Complaint not found' });
+        }
+
+        const history = complaint.blockchainHistory || [];
+        const results = history.map((block, i) => {
+            const isValid = verifyBlock(block);
+            const chainValid = i === 0 || block.previousHash === history[i - 1].hash;
+            return {
+                blockNumber: block.blockNumber,
+                hash: block.hash,
+                previousHash: block.previousHash,
+                status: block.status,
+                timestamp: block.timestamp,
+                hashValid: isValid,
+                chainValid: chainValid
+            };
+        });
+
+        const allValid = results.every(r => r.hashValid && r.chainValid);
+
+        res.json({
+            complaintId: complaint.id,
+            verified: allValid,
+            totalBlocks: history.length,
+            blocks: results
+        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
