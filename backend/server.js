@@ -54,23 +54,15 @@ function createBlock(complaint, previousHash = '0') {
         timestamp: new Date().toISOString(),
         previousHash: previousHash
     };
-    const hash = generateHash(blockData);
-    return { ...blockData, hash };
+    // Store the EXACT string that was hashed → guarantees verification works
+    const hashInput = JSON.stringify(blockData);
+    const hash = crypto.createHash('sha256').update(hashInput).digest('hex');
+    return { ...blockData, hash, hashInput };
 }
 
 function verifyBlock(block) {
-    // Recreate the exact same object that was originally hashed
-    const blockData = {
-        complaintId: block.complaintId,
-        trackingId: block.trackingId,
-        title: block.title,
-        category: block.category,
-        status: block.status,
-        userId: block.userId,
-        timestamp: block.timestamp,
-        previousHash: block.previousHash
-    };
-    const recomputedHash = generateHash(blockData);
+    if (!block.hashInput || !block.hash) return false;
+    const recomputedHash = crypto.createHash('sha256').update(block.hashInput).digest('hex');
     return recomputedHash === block.hash;
 }
 
