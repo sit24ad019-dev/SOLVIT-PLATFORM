@@ -10,8 +10,7 @@
     
     <!-- Chart.js for Visualizations -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Libraries for PDF Download -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- jsPDF for PDF Generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
     <style>
@@ -32,13 +31,6 @@
         .chart-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; padding: 24px; }
         .chart-card h3 { font-size: 1.1rem; margin-bottom: 20px; color: #fff; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
         .chart-container { position: relative; height: 300px; width: 100%; }
-
-        /* We need a specific container to capture for the PDF */
-        #pdf-report-container {
-            background: #0b0f1a; 
-            padding: 20px; 
-            border-radius: 20px;
-        }
 
         @media (max-width: 768px) {
             .charts-grid { grid-template-columns: 1fr; }
@@ -73,46 +65,38 @@
                     </div>
                 </div>
 
-                <!-- THIS DIV WILL BE CAPTURED FOR THE PDF -->
-                <div id="pdf-report-container">
-                    <div style="text-align: center; margin-bottom: 30px; display: none;" id="pdf-title">
-                        <h1 style="color: #fff; font-family: 'Playfair Display', serif;">SOLVIT Monthly Governance Report</h1>
-                        <p style="color: #aaa;">Generated on <span id="reportDate"></span></p>
-                    </div>
+                <!-- Key Stats -->
+                <div class="stats-row" id="stats-row">
+                    <div class="stat-box blue"><h3 id="totalCount">0</h3><p>Total Complaints</p></div>
+                    <div class="stat-box yellow"><h3 id="pendingCount">0</h3><p>Pending Action</p></div>
+                    <div class="stat-box green"><h3 id="resolvedCount">0</h3><p>Successfully Resolved</p></div>
+                    <div class="stat-box red"><h3 id="escalatedCount">0</h3><p>Escalated to CM</p></div>
+                </div>
 
-                    <!-- Key Stats -->
-                    <div class="stats-row">
-                        <div class="stat-box blue"><h3 id="totalCount">0</h3><p>Total Complaints</p></div>
-                        <div class="stat-box yellow"><h3 id="pendingCount">0</h3><p>Pending Action</p></div>
-                        <div class="stat-box green"><h3 id="resolvedCount">0</h3><p>Successfully Resolved</p></div>
-                        <div class="stat-box red"><h3 id="escalatedCount">0</h3><p>Escalated to CM</p></div>
-                    </div>
-
-                    <!-- Charts -->
-                    <div class="charts-grid">
-                        <!-- Category Pie Chart -->
-                        <div class="chart-card">
-                            <h3><i class="fas fa-chart-pie" style="color:#8b5cf6;"></i> Complaints by Category (Funding Needs)</h3>
-                            <div class="chart-container">
-                                <canvas id="categoryChart"></canvas>
-                            </div>
-                        </div>
-
-                        <!-- District Bar Chart -->
-                        <div class="chart-card">
-                            <h3><i class="fas fa-chart-bar" style="color:#3b82f6;"></i> Complaints by District (Resource Allocation)</h3>
-                            <div class="chart-container">
-                                <canvas id="districtChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Monthly Trend Line Chart -->
+                <!-- Charts -->
+                <div class="charts-grid">
+                    <!-- Category Pie Chart -->
                     <div class="chart-card">
-                        <h3><i class="fas fa-chart-line" style="color:#10b981;"></i> Complaint Volume Trend</h3>
-                        <div class="chart-container" style="height: 250px;">
-                            <canvas id="trendChart"></canvas>
+                        <h3><i class="fas fa-chart-pie" style="color:#8b5cf6;"></i> Complaints by Category (Funding Needs)</h3>
+                        <div class="chart-container">
+                            <canvas id="categoryChart"></canvas>
                         </div>
+                    </div>
+
+                    <!-- District Bar Chart -->
+                    <div class="chart-card">
+                        <h3><i class="fas fa-chart-bar" style="color:#3b82f6;"></i> Complaints by District (Resource Allocation)</h3>
+                        <div class="chart-container">
+                            <canvas id="districtChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Monthly Trend Line Chart -->
+                <div class="chart-card">
+                    <h3><i class="fas fa-chart-line" style="color:#10b981;"></i> Complaint Volume Trend</h3>
+                    <div class="chart-container" style="height: 250px;">
+                        <canvas id="trendChart"></canvas>
                     </div>
                 </div>
 
@@ -123,15 +107,17 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="../script.js"></script>
     <script>
-        const API_BASE = 'https://solvit-platform.onrender.com/api';
+        const API_BASE = window.SOLVIT_API_BASE || 'https://solvit-platform.onrender.com/api';
+        
+        // Store chart instances globally so we can extract images from them later
+        let catChartInstance, distChartInstance, trendChartInstance;
+        let reportStats = {};
 
         document.addEventListener('DOMContentLoaded', async () => {
-            // Set current date for PDF title
-            document.getElementById('reportDate').textContent = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
-
             try {
                 const res = await fetch(`${API_BASE}/complaints/report/summary`);
                 const data = await res.json();
+                reportStats = data;
 
                 // 1. Update Stats Cards
                 document.getElementById('totalCount').textContent = data.total;
@@ -141,20 +127,20 @@
 
                 // 2. Render Category Pie Chart
                 const catCtx = document.getElementById('categoryChart').getContext('2d');
-                new Chart(catCtx, {
+                catChartInstance = new Chart(catCtx, {
                     type: 'doughnut',
                     data: {
                         labels: Object.keys(data.byCategory),
                         datasets: [{
                             data: Object.values(data.byCategory),
                             backgroundColor: ['#3b82f6', '#8b5cf6', '#f59e0b', '#10b981', '#ef4444', '#ec4899', '#06b6d4'],
-                            borderWidth: 0
+                            borderWidth: 1,
+                            borderColor: '#0b0f1a'
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        animation: false, // Disable animation for cleaner PDF capture
                         plugins: {
                             legend: { position: 'right', labels: { color: '#ccc' } }
                         }
@@ -163,7 +149,7 @@
 
                 // 3. Render District Bar Chart
                 const distCtx = document.getElementById('districtChart').getContext('2d');
-                new Chart(distCtx, {
+                distChartInstance = new Chart(distCtx, {
                     type: 'bar',
                     data: {
                         labels: Object.keys(data.byDistrict),
@@ -177,10 +163,7 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        animation: false,
-                        plugins: {
-                            legend: { display: false }
-                        },
+                        plugins: { legend: { display: false } },
                         scales: {
                             y: { ticks: { color: '#888' }, grid: { color: 'rgba(255,255,255,0.05)' } },
                             x: { ticks: { color: '#888' }, grid: { display: false } }
@@ -190,7 +173,7 @@
 
                 // 4. Render Monthly Trend Line Chart
                 const trendCtx = document.getElementById('trendChart').getContext('2d');
-                new Chart(trendCtx, {
+                trendChartInstance = new Chart(trendCtx, {
                     type: 'line',
                     data: {
                         labels: Object.keys(data.monthlyTrend),
@@ -207,10 +190,7 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        animation: false,
-                        plugins: {
-                            legend: { display: false }
-                        },
+                        plugins: { legend: { display: false } },
                         scales: {
                             y: { ticks: { color: '#888' }, grid: { color: 'rgba(255,255,255,0.05)' } },
                             x: { ticks: { color: '#888' }, grid: { display: false } }
@@ -220,7 +200,7 @@
 
             } catch (err) {
                 console.error('Error loading report:', err);
-                alert('Failed to load visual report data. Make sure the backend is running.');
+                alert('Failed to load visual report data. Please ensure the backend is running.');
             }
         });
 
@@ -230,43 +210,76 @@
             const originalText = btn.innerHTML;
             
             try {
-                // Show loading state
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
                 btn.disabled = true;
 
-                // Temporarily show the title for the PDF
-                document.getElementById('pdf-title').style.display = 'block';
-
-                // Capture the HTML element (the charts and stats)
-                const element = document.getElementById('pdf-report-container');
-                const canvas = await html2canvas(element, { 
-                    scale: 2, // High resolution
-                    backgroundColor: '#0b0f1a',
-                    useCORS: true 
-                });
-
-                // Hide the title again
-                document.getElementById('pdf-title').style.display = 'none';
-
-                // Create PDF (A4 size)
                 const { jsPDF } = window.jspdf;
                 const pdf = new jsPDF('p', 'mm', 'a4');
-                
-                const imgData = canvas.toDataURL('image/png');
-                const pdfWidth = pdf.internal.pageSize.getWidth();
-                const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+                const pageWidth = pdf.internal.pageSize.getWidth();
 
-                // Add image to PDF
-                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                // ── 1. ADD HEADER ──
+                pdf.setFillColor(11, 15, 26); // Dark background
+                pdf.rect(0, 0, pageWidth, 40, 'F');
                 
-                // Save the file
+                pdf.setTextColor(255, 255, 255);
+                pdf.setFontSize(22);
+                pdf.setFont("helvetica", "bold");
+                pdf.text("SOLVIT Governance Report", 15, 20);
+                
+                pdf.setFontSize(10);
+                pdf.setFont("helvetica", "normal");
+                pdf.setTextColor(150, 150, 150);
+                const dateStr = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+                pdf.text(`Generated on: ${dateStr}`, 15, 30);
+
+                // ── 2. ADD STATS BOXES ──
+                pdf.setTextColor(0, 0, 0);
+                pdf.setFontSize(14);
+                pdf.setFont("helvetica", "bold");
+                pdf.text("Key Metrics", 15, 55);
+
+                pdf.setFontSize(12);
+                pdf.setFont("helvetica", "normal");
+                const statsY = 65;
+                pdf.text(`Total Complaints: ${reportStats.total}`, 15, statsY);
+                pdf.text(`Pending Action: ${reportStats.pending}`, 15, statsY + 8);
+                pdf.text(`Resolved: ${reportStats.resolved}`, 15, statsY + 16);
+                pdf.text(`Escalated to CM: ${reportStats.escalated}`, 15, statsY + 24);
+
+                // ── 3. ADD CHARTS AS IMAGES ──
+                // Extract image from Chart.js canvases
+                const catImg = catChartInstance.toBase64Image();
+                const distImg = distChartInstance.toBase64Image();
+                const trendImg = trendChartInstance.toBase64Image();
+
+                // Page 1: Category Chart
+                pdf.setFontSize(14);
+                pdf.setFont("helvetica", "bold");
+                pdf.text("Complaints by Category (Funding Needs)", 15, 105);
+                pdf.addImage(catImg, 'PNG', 15, 110, 100, 60); // width 100mm, height 60mm
+
+                // Page 1: District Chart
+                pdf.text("Complaints by District (Resource Allocation)", 15, 185);
+                pdf.addImage(distImg, 'PNG', 15, 190, 100, 60);
+
+                // Page 2: Trend Chart
+                pdf.addPage();
+                pdf.setFillColor(11, 15, 26);
+                pdf.rect(0, 0, pageWidth, 20, 'F');
+                pdf.setTextColor(255, 255, 255);
+                pdf.setFontSize(16);
+                pdf.text("Complaint Volume Trend", 15, 13);
+
+                pdf.setTextColor(0, 0, 0);
+                pdf.addImage(trendImg, 'PNG', 15, 30, 180, 90); // Full width
+
+                // Save the PDF
                 pdf.save(`SOLVIT_Report_${new Date().toISOString().split('T')[0]}.pdf`);
 
             } catch (error) {
                 console.error('Error generating PDF:', error);
                 alert('Failed to generate PDF. Please try again.');
             } finally {
-                // Reset button
                 btn.innerHTML = originalText;
                 btn.disabled = false;
             }
