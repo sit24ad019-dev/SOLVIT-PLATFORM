@@ -57,21 +57,28 @@
     <script src="../script.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            function loadStats() {
-                const allComplaints = [];
-                const serviceKeys = ['solvit_complaints','solvit_land_applications','solvit_rti_requests','solvit_health_reports','solvit_edu_reports','solvit_safety_complaints','solvit_agri_applications','solvit_loan_applications'];
-                serviceKeys.forEach(key => {
-                    const data = JSON.parse(localStorage.getItem(key)) || [];
-                    data.forEach(item => allComplaints.push(item));
-                });
-                const total = allComplaints.length;
-                const resolved = allComplaints.filter(c => c.status === 'Resolved' || c.status === 'Completed' || c.status === 'Closed').length;
-                const pending = allComplaints.filter(c => c.status !== 'Resolved' && c.status !== 'Completed' && c.status !== 'Closed').length;
-                const violations = allComplaints.filter(c => c.slaMet === false).length || 0;
-                document.getElementById('totalComplaints').textContent = total;
-                document.getElementById('resolvedComplaints').textContent = resolved;
-                document.getElementById('pendingComplaints').textContent = pending;
-                document.getElementById('slaViolations').textContent = violations;
+            async function loadStats() {
+                try {
+                    const response = await fetch('https://solvit-platform.onrender.com/api/complaints');
+                    if (!response.ok) throw new Error(`Complaint request failed (${response.status})`);
+                    const complaints = await response.json();
+                    if (!Array.isArray(complaints)) throw new Error('Invalid complaints response');
+
+                    const isResolved = complaint => ['Resolved', 'Completed', 'Closed'].includes(complaint.status);
+                    const now = Date.now();
+                    const violations = complaints.filter(complaint =>
+                        complaint.slaMet === false ||
+                        (!complaint.isReviewed && complaint.slaDeadline && new Date(complaint.slaDeadline).getTime() < now)
+                    ).length;
+
+                    document.getElementById('totalComplaints').textContent = complaints.length;
+                    document.getElementById('resolvedComplaints').textContent = complaints.filter(isResolved).length;
+                    document.getElementById('pendingComplaints').textContent = complaints.filter(complaint => !isResolved(complaint)).length;
+                    document.getElementById('slaViolations').textContent = violations;
+                } catch (err) {
+                    console.error('Failed to load government complaint statistics:', err);
+                    document.getElementById('quickStats').innerHTML = '<p role="alert">Unable to load statistics from the database.</p>';
+                }
             }
             loadStats();
         });
