@@ -387,7 +387,7 @@
                 }
 
                 // ─── CALL BACKEND API ───
-                fetch('https://solvit-platform.onrender.com/api/users/register', {
+                fetch(`${window.SOLVIT_API_BASE}/users/register`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({

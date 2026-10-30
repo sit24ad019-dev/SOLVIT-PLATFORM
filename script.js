@@ -1,3 +1,8 @@
+window.SOLVIT_API_BASE = window.SOLVIT_API_BASE ||
+    (['localhost', '127.0.0.1'].includes(window.location.hostname)
+        ? 'http://localhost:5000/api'
+        : 'https://solvit-platform.onrender.com/api');
+
 // ─── 1. THREE.JS 3D SCENE ───
 const scene = new THREE.Scene();
 scene.background = null;

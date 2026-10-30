@@ -179,7 +179,7 @@
                     timeline: [{ status: 'Created', date: new Date().toISOString(), remark: 'Petition created successfully.' }]
                 };
 
-                fetch('https://solvit-platform.onrender.com/api/petitions', {
+                fetch(`${window.SOLVIT_API_BASE}/petitions`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(petitionData)

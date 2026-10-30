@@ -59,7 +59,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             async function loadStats() {
                 try {
-                    const response = await fetch('https://solvit-platform.onrender.com/api/complaints');
+                    const response = await fetch(`${window.SOLVIT_API_BASE}/complaints`);
                     if (!response.ok) throw new Error(`Complaint request failed (${response.status})`);
                     const complaints = await response.json();
                     if (!Array.isArray(complaints)) throw new Error('Invalid complaints response');

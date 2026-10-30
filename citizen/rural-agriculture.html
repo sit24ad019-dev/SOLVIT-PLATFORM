@@ -148,7 +148,7 @@
                     timeline: [{ status: 'Submitted', date: new Date().toISOString(), remark: 'Application submitted successfully.' }]
                 };
 
-                fetch('https://solvit-platform.onrender.com/api/agriculture', {
+                fetch(`${window.SOLVIT_API_BASE}/agriculture`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(appData)

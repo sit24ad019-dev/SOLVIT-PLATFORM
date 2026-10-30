@@ -126,7 +126,7 @@
                     timeline: [{ status: 'Submitted', date: new Date().toISOString(), remark: 'Application submitted successfully.' }]
                 };
 
-                fetch('https://solvit-platform.onrender.com/api/land', {
+                fetch(`${window.SOLVIT_API_BASE}/land`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(application)

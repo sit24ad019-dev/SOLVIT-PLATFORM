@@ -118,7 +118,7 @@
                     timeline: [{ status: 'Reported', date: new Date().toISOString(), remark: 'Education issue reported successfully.' }]
                 };
 
-                fetch('https://solvit-platform.onrender.com/api/education-reports', {
+                fetch(`${window.SOLVIT_API_BASE}/education-reports`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(reportData)

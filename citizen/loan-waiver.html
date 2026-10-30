@@ -234,7 +234,7 @@
                     timeline: [{ status: 'Submitted', date: new Date().toISOString(), remark: 'Loan waiver application submitted successfully.' }]
                 };
 
-                fetch('https://solvit-platform.onrender.com/api/loan', {
+                fetch(`${window.SOLVIT_API_BASE}/loan`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(appData)

@@ -7,17 +7,17 @@ const crypto = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const allowedRoles = new Set(['citizen', 'government']);
 
 // ─── MIDDLEWARE ───
 app.use(cors());
 app.use(express.json());
 
 // ─── MONGODB CONNECTION ───
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/solvit';
-
-mongoose.connect(MONGODB_URI)
-.then(() => console.log('✅ Connected to MongoDB successfully!'))
-.catch((err) => console.error('❌ MongoDB connection error:', err));
+const MONGODB_URI = process.env.MONGODB_URI;
+if (!MONGODB_URI) throw new Error('MONGODB_URI must be configured before starting the API.');
+const uriDatabaseName = MONGODB_URI.match(/^mongodb(?:\+srv)?:\/\/[^/?]+\/([^/?]+)/)?.[1];
+const MONGODB_DB_NAME = process.env.MONGODB_DB_NAME || uriDatabaseName || 'solvit';
 
 // ─── HELPER: Generate unique tracking ID ───
 function generateTrackingId(prefix = 'TRK') {
@@ -69,9 +69,33 @@ function verifyBlock(block) {
 
 // 1. User Schema
 const userSchema = new mongoose.Schema({
-    id: String, fullName: String, email: String, mobile: String, password: String, role: String, state: String, district: String, language: String, registeredAt: Date
+    id: String, fullName: String, email: String, mobile: String, password: String, role: String, state: String, district: String, language: String, registeredAt: Date, lastLoginAt: Date
 });
 const User = mongoose.model('User', userSchema);
+
+function hashPassword(password) {
+    const salt = crypto.randomBytes(16);
+    const hash = crypto.scryptSync(password, salt, 64);
+    return `scrypt$${salt.toString('hex')}$${hash.toString('hex')}`;
+}
+
+function verifyPassword(password, storedPassword) {
+    const [algorithm, saltHex, hashHex] = (storedPassword || '').split('$');
+    if (algorithm !== 'scrypt' || !saltHex || !hashHex) {
+        return storedPassword === password;
+    }
+
+    const salt = Buffer.from(saltHex, 'hex');
+    const expectedHash = Buffer.from(hashHex, 'hex');
+    const actualHash = crypto.scryptSync(password, salt, expectedHash.length);
+    return actualHash.length === expectedHash.length && crypto.timingSafeEqual(actualHash, expectedHash);
+}
+
+function publicUser(user) {
+    const result = user.toObject();
+    delete result.password;
+    return result;
+}
 
 // 2. Complaint Schema (WITH NEW SLA & ESCALATION FIELDS)
 const complaintSchema = new mongoose.Schema({
@@ -164,17 +188,73 @@ const InfrastructureReport = mongoose.model('InfrastructureReport', infrastructu
 
 // ─── API ROUTES ───
 
-app.get('/api/health', (req, res) => res.json({ status: 'OK', message: 'SOLVIT API is running!' }));
+app.get('/api/health', (req, res) => {
+    const connected = mongoose.connection.readyState === 1;
+    res.status(connected ? 200 : 503).json({
+        status: connected ? 'OK' : 'ERROR',
+        database: connected ? 'connected' : 'disconnected',
+        databaseName: MONGODB_DB_NAME
+    });
+});
 
-app.get('/api/users', async (req, res) => { try { res.json(await User.find()); } catch (err) { res.status(500).json({ error: err.message }); } });
-app.post('/api/users/register', async (req, res) => { try { const user = new User(req.body); await user.save(); res.json({ success: true, user }); } catch (err) { res.status(500).json({ error: err.message }); } });
+app.get('/api/users', async (req, res) => {
+    try { res.json(await User.find().select('-password')); }
+    catch (err) { console.error('Failed to fetch users:', err); res.status(500).json({ error: 'Unable to fetch users' }); }
+});
+app.post('/api/users/register', async (req, res) => {
+    try {
+        const { fullName, email, mobile, password, role, state, district, language } = req.body || {};
+        const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
+        const normalizedMobile = typeof mobile === 'string' ? mobile.trim() : '';
+        if (typeof fullName !== 'string' || !fullName.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail) || !normalizedMobile || typeof password !== 'string' || password.length < 6 || !allowedRoles.has(role)) {
+            return res.status(400).json({ error: 'Please provide valid registration details.' });
+        }
+
+        const existingUser = await User.findOne({ $or: [{ email: normalizedEmail }, { mobile: normalizedMobile }] });
+        if (existingUser) return res.status(409).json({ error: 'An account with that email or mobile number already exists.' });
+
+        const user = await User.create({
+            id: `USR-${Date.now()}-${crypto.randomBytes(3).toString('hex')}`,
+            fullName: fullName.trim(),
+            email: normalizedEmail,
+            mobile: normalizedMobile,
+            password: hashPassword(password),
+            role,
+            state,
+            district: district || 'Not specified',
+            language,
+            registeredAt: new Date()
+        });
+        res.status(201).json({ success: true, user: publicUser(user) });
+    } catch (err) {
+        console.error('Failed to register user:', err);
+        res.status(500).json({ error: 'Unable to register user. Please try again.' });
+    }
+});
 app.post('/api/users/login', async (req, res) => {
     try {
-        const { identifier, password, role } = req.body;
-        const user = await User.findOne({ $or: [{ email: identifier }, { mobile: identifier }], password, role });
-        if (!user) return res.status(401).json({ error: 'Invalid credentials' });
-        res.json({ success: true, user });
-    } catch (err) { res.status(500).json({ error: err.message }); }
+        const { identifier, password, role } = req.body || {};
+        if (typeof identifier !== 'string' || typeof password !== 'string' || !allowedRoles.has(role)) {
+            return res.status(400).json({ error: 'Please provide valid login details.' });
+        }
+        const normalizedIdentifier = identifier.trim();
+        const user = await User.findOne({
+            $or: [{ email: normalizedIdentifier.toLowerCase() }, { mobile: normalizedIdentifier }],
+            role
+        });
+        if (!user || !verifyPassword(password, user.password)) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+        if (!user.password.startsWith('scrypt$')) {
+            user.password = hashPassword(password);
+        }
+        user.lastLoginAt = new Date();
+        await user.save();
+        res.json({ success: true, user: publicUser(user) });
+    } catch (err) {
+        console.error('Failed to log in user:', err);
+        res.status(500).json({ error: 'Unable to log in. Please try again.' });
+    }
 });
 
 // ─── COMPLAINTS ───
@@ -492,4 +572,15 @@ makeStandardRoutes(LoanApplication, 'loan', 'LNW');
 makeStandardRoutes(CorruptionReport, 'corruption', 'COR');
 makeStandardRoutes(InfrastructureReport, 'infrastructure', 'INF');
 
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+async function startServer() {
+    try {
+        await mongoose.connect(MONGODB_URI, { dbName: MONGODB_DB_NAME });
+        console.log(`✅ Connected to MongoDB database "${MONGODB_DB_NAME}"`);
+        app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+    } catch (err) {
+        console.error('❌ MongoDB connection error:', err.message);
+        process.exit(1);
+    }
+}
+
+startServer();

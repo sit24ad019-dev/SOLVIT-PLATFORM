@@ -242,7 +242,7 @@
     <script src="../script.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const API_BASE = 'https://solvit-platform.onrender.com/api';
+            const API_BASE = window.SOLVIT_API_BASE;
 
             showFileName('complaintMedia', 'imageFileName');
             getCurrentLocation('getLocationBtn', 'complaintLocation', 'latitude', 'longitude');

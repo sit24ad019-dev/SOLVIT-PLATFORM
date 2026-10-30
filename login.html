@@ -301,7 +301,7 @@
                 }
 
                 // ─── CALL BACKEND API (supports email OR mobile) ───
-                fetch('https://solvit-platform.onrender.com/api/users/login', {
+                fetch(`${window.SOLVIT_API_BASE}/users/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 

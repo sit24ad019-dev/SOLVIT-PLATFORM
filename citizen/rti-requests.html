@@ -141,7 +141,7 @@
                     timeline: [{ status: 'Submitted', date: new Date().toISOString(), remark: 'RTI request submitted successfully.' }]
                 };
 
-                fetch('https://solvit-platform.onrender.com/api/rti', {
+                fetch(`${window.SOLVIT_API_BASE}/rti`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(rtiData)
