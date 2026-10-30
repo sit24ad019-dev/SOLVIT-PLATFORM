@@ -303,18 +303,103 @@ app.get('/api/complaints/:id/verify', async (req, res) => {
 });
 
 // AI Text Clustering
+// AI Text Clustering (Keyword-Based Department Mapping)
 app.get('/api/complaints/clusters', async (req, res) => {
     try {
         const complaints = await Complaint.find();
+
+        // Define the standard Indian Civic Departments and their related keywords
+        const departmentRules = [
+            {
+                name: "🚰 Drainage & Sewage",
+                keywords: ["drain", "sewage", "waterlog", "gutter", "overflow", "stagnant", "toilet", "manhole", "sanitation"]
+            },
+            {
+                name: "🚧 Roads & Potholes",
+                keywords: ["road", "pothole", "bridge", "tar", "highway", "street", "footpath", "pavement", "speed breaker", "accident"]
+            },
+            {
+                name: "🗑️ Garbage & Waste",
+                keywords: ["garbage", "trash", "waste", "dump", "bin", "dustbin", "cleaning", "sweep", "plastic", "litter"]
+            },
+            {
+                name: "💧 Water Supply",
+                keywords: ["water", "pipe", "leak", "supply", "tanker", "drinking", "tap", "borewell", "muddy", "pressure"]
+            },
+            {
+                name: "⚡ Electricity & Power",
+                keywords: ["electricity", "power", "outage", "transformer", "pole", "wire", "streetlight", "street light", "current", "shock", "voltage"]
+            },
+            {
+                name: "🏥 Public Health",
+                keywords: ["hospital", "disease", "doctor", "medicine", "mosquito", "health", "fever", "clinic", "ambulance", "dengue", "sanitizer"]
+            },
+            {
+                name: "🚦 Traffic & Transport",
+                keywords: ["traffic", "bus", "signal", "transport", "parking", "auto", "train", "vehicle", "congestion", "zebra crossing"]
+            },
+            {
+                name: "🚓 Police & Public Safety",
+                keywords: ["police", "theft", "safety", "crime", "security", "fir", "robbery", "harassment", "emergency", "sos"]
+            },
+            {
+                name: "🏫 Education & Schools",
+                keywords: ["school", "teacher", "book", "scholarship", "education", "student", "mid-day meal", "classroom", "exam"]
+            },
+            {
+                name: "🌾 Agriculture & Farming",
+                keywords: ["crop", "farmer", "subsidy", "insurance", "land", "tractor", "fertilizer", "harvest", "irrigation", "loan", "pest"]
+            },
+            {
+                name: "🏛️ Corruption & RTI",
+                keywords: ["bribe", "corrupt", "rti", "information", "officer", "money", "demand", "illegal", "fraud", "misuse"]
+            }
+        ];
+
         const clusters = {};
+
+        // Analyze every complaint
         complaints.forEach(c => {
-            const words = (c.description || '').toLowerCase().split(' ').filter(w => w.length > 4).slice(0, 2).join('_');
-            const key = words ? `${c.category}_${words}` : c.category;
-            if (!clusters[key]) clusters[key] = { clusterName: key.replace(/_/g, ' ').toUpperCase(), count: 0 };
-            clusters[key].count++;
+            const text = `${c.title || ''} ${c.description || ''} ${c.category || ''}`.toLowerCase();
+            
+            let matchedDepartment = null;
+
+            // Try to find a matching department based on keywords
+            for (const rule of departmentRules) {
+                if (rule.keywords.some(keyword => text.includes(keyword))) {
+                    matchedDepartment = rule.name;
+                    break; // Stop searching once a match is found
+                }
+            }
+
+            // If no keywords match, put it in "General / Others"
+            if (!matchedDepartment) {
+                matchedDepartment = "📋 General / Others";
+            }
+
+            // Initialize the cluster if it doesn't exist
+            if (!clusters[matchedDepartment]) {
+                clusters[matchedDepartment] = { 
+                    clusterName: matchedDepartment, 
+                    count: 0,
+                    complaints: []
+                };
+            }
+
+            // Add to cluster
+            clusters[matchedDepartment].count++;
+            clusters[matchedDepartment].complaints.push(c.title);
         });
-        res.json(Object.values(clusters).sort((a, b) => b.count - a.count));
-    } catch (err) { res.status(500).json({ error: err.message }); }
+
+        // Convert object to array, filter out empty clusters, and sort by highest count
+        const sortedClusters = Object.values(clusters)
+            .filter(c => c.count > 0)
+            .sort((a, b) => b.count - a.count);
+
+        res.json(sortedClusters);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // Monthly Report CSV
