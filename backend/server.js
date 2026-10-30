@@ -401,7 +401,51 @@ app.get('/api/complaints/clusters', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+// ─── VISUAL REPORT SUMMARY ───
+app.get('/api/complaints/report/summary', async (req, res) => {
+    try {
+        const complaints = await Complaint.find();
 
+        const summary = {
+            total: complaints.length,
+            resolved: 0,
+            pending: 0,
+            escalated: 0,
+            byCategory: {},
+            byDistrict: {},
+            monthlyTrend: {}
+        };
+
+        complaints.forEach(c => {
+            // Status Counts
+            const status = (c.status || 'Submitted').toLowerCase();
+            if (status.includes('resolve') || status.includes('complete') || status.includes('closed')) {
+                summary.resolved++;
+            } else if (c.isEscalated) {
+                summary.escalated++;
+            } else {
+                summary.pending++;
+            }
+
+            // Category Counts (Where to fund?)
+            const category = c.category || 'Others';
+            summary.byCategory[category] = (summary.byCategory[category] || 0) + 1;
+
+            // District Counts (Where to allocate resources?)
+            const district = c.district || 'Unknown';
+            summary.byDistrict[district] = (summary.byDistrict[district] || 0) + 1;
+
+            // Monthly Trend (Last 6 months)
+            const date = new Date(c.createdAt);
+            const monthYear = date.toLocaleString('default', { month: 'short', year: 'numeric' });
+            summary.monthlyTrend[monthYear] = (summary.monthlyTrend[monthYear] || 0) + 1;
+        });
+
+        res.json(summary);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 // Monthly Report CSV
 app.get('/api/complaints/report/monthly', async (req, res) => {
     try {
