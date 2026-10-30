@@ -7,8 +7,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link rel="stylesheet" href="../style.css" />
+    
     <!-- Chart.js for Visualizations -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Libraries for PDF Download -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
     <style>
         .report-section { padding: 30px 0 60px; }
@@ -29,6 +33,13 @@
         .chart-card h3 { font-size: 1.1rem; margin-bottom: 20px; color: #fff; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
         .chart-container { position: relative; height: 300px; width: 100%; }
 
+        /* We need a specific container to capture for the PDF */
+        #pdf-report-container {
+            background: #0b0f1a; 
+            padding: 20px; 
+            border-radius: 20px;
+        }
+
         @media (max-width: 768px) {
             .charts-grid { grid-template-columns: 1fr; }
         }
@@ -46,48 +57,62 @@
 
         <section class="report-section">
             <div class="container">
+                <!-- HEADER BUTTONS -->
                 <div class="report-header">
                     <div>
                         <h2>📈 Visual Analytics & Funding Report</h2>
                         <p style="color: rgba(255,255,255,0.5);">Data-driven insights to allocate funds and resources efficiently.</p>
                     </div>
-                    <a href="government-dashboard.html" class="btn-primary" style="padding: 10px 24px; border-radius: 30px; text-decoration: none; background: #3b82f6; color: #fff; font-weight: 600;">
-                        <i class="fas fa-arrow-left"></i> Back to Dashboard
-                    </a>
-                </div>
-
-                <!-- Key Stats -->
-                <div class="stats-row">
-                    <div class="stat-box blue"><h3 id="totalCount">0</h3><p>Total Complaints</p></div>
-                    <div class="stat-box yellow"><h3 id="pendingCount">0</h3><p>Pending Action</p></div>
-                    <div class="stat-box green"><h3 id="resolvedCount">0</h3><p>Successfully Resolved</p></div>
-                    <div class="stat-box red"><h3 id="escalatedCount">0</h3><p>Escalated to CM</p></div>
-                </div>
-
-                <!-- Charts -->
-                <div class="charts-grid">
-                    <!-- Category Pie Chart -->
-                    <div class="chart-card">
-                        <h3><i class="fas fa-chart-pie" style="color:#8b5cf6;"></i> Complaints by Category (Funding Needs)</h3>
-                        <div class="chart-container">
-                            <canvas id="categoryChart"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- District Bar Chart -->
-                    <div class="chart-card">
-                        <h3><i class="fas fa-chart-bar" style="color:#3b82f6;"></i> Complaints by District (Resource Allocation)</h3>
-                        <div class="chart-container">
-                            <canvas id="districtChart"></canvas>
-                        </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button onclick="downloadPDF()" id="downloadBtn" style="padding: 10px 24px; border-radius: 30px; text-decoration: none; background: #10b981; color: #fff; font-weight: 600; border: none; cursor: pointer;">
+                            <i class="fas fa-file-pdf"></i> Download PDF Report
+                        </button>
+                        <a href="government-dashboard.html" class="btn-primary" style="padding: 10px 24px; border-radius: 30px; text-decoration: none; background: #3b82f6; color: #fff; font-weight: 600;">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </a>
                     </div>
                 </div>
 
-                <!-- Monthly Trend Line Chart -->
-                <div class="chart-card">
-                    <h3><i class="fas fa-chart-line" style="color:#10b981;"></i> Complaint Volume Trend</h3>
-                    <div class="chart-container" style="height: 250px;">
-                        <canvas id="trendChart"></canvas>
+                <!-- THIS DIV WILL BE CAPTURED FOR THE PDF -->
+                <div id="pdf-report-container">
+                    <div style="text-align: center; margin-bottom: 30px; display: none;" id="pdf-title">
+                        <h1 style="color: #fff; font-family: 'Playfair Display', serif;">SOLVIT Monthly Governance Report</h1>
+                        <p style="color: #aaa;">Generated on <span id="reportDate"></span></p>
+                    </div>
+
+                    <!-- Key Stats -->
+                    <div class="stats-row">
+                        <div class="stat-box blue"><h3 id="totalCount">0</h3><p>Total Complaints</p></div>
+                        <div class="stat-box yellow"><h3 id="pendingCount">0</h3><p>Pending Action</p></div>
+                        <div class="stat-box green"><h3 id="resolvedCount">0</h3><p>Successfully Resolved</p></div>
+                        <div class="stat-box red"><h3 id="escalatedCount">0</h3><p>Escalated to CM</p></div>
+                    </div>
+
+                    <!-- Charts -->
+                    <div class="charts-grid">
+                        <!-- Category Pie Chart -->
+                        <div class="chart-card">
+                            <h3><i class="fas fa-chart-pie" style="color:#8b5cf6;"></i> Complaints by Category (Funding Needs)</h3>
+                            <div class="chart-container">
+                                <canvas id="categoryChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- District Bar Chart -->
+                        <div class="chart-card">
+                            <h3><i class="fas fa-chart-bar" style="color:#3b82f6;"></i> Complaints by District (Resource Allocation)</h3>
+                            <div class="chart-container">
+                                <canvas id="districtChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Monthly Trend Line Chart -->
+                    <div class="chart-card">
+                        <h3><i class="fas fa-chart-line" style="color:#10b981;"></i> Complaint Volume Trend</h3>
+                        <div class="chart-container" style="height: 250px;">
+                            <canvas id="trendChart"></canvas>
+                        </div>
                     </div>
                 </div>
 
@@ -98,9 +123,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="../script.js"></script>
     <script>
-        const API_BASE = window.SOLVIT_API_BASE;
+        const API_BASE = 'https://solvit-platform.onrender.com/api';
 
         document.addEventListener('DOMContentLoaded', async () => {
+            // Set current date for PDF title
+            document.getElementById('reportDate').textContent = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+
             try {
                 const res = await fetch(`${API_BASE}/complaints/report/summary`);
                 const data = await res.json();
@@ -126,6 +154,7 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        animation: false, // Disable animation for cleaner PDF capture
                         plugins: {
                             legend: { position: 'right', labels: { color: '#ccc' } }
                         }
@@ -148,6 +177,7 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        animation: false,
                         plugins: {
                             legend: { display: false }
                         },
@@ -177,6 +207,7 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        animation: false,
                         plugins: {
                             legend: { display: false }
                         },
@@ -189,9 +220,57 @@
 
             } catch (err) {
                 console.error('Error loading report:', err);
-                alert('Failed to load visual report data.');
+                alert('Failed to load visual report data. Make sure the backend is running.');
             }
         });
+
+        // ─── DOWNLOAD PDF FUNCTION ───
+        window.downloadPDF = async function() {
+            const btn = document.getElementById('downloadBtn');
+            const originalText = btn.innerHTML;
+            
+            try {
+                // Show loading state
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
+                btn.disabled = true;
+
+                // Temporarily show the title for the PDF
+                document.getElementById('pdf-title').style.display = 'block';
+
+                // Capture the HTML element (the charts and stats)
+                const element = document.getElementById('pdf-report-container');
+                const canvas = await html2canvas(element, { 
+                    scale: 2, // High resolution
+                    backgroundColor: '#0b0f1a',
+                    useCORS: true 
+                });
+
+                // Hide the title again
+                document.getElementById('pdf-title').style.display = 'none';
+
+                // Create PDF (A4 size)
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                
+                const imgData = canvas.toDataURL('image/png');
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+                // Add image to PDF
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                
+                // Save the file
+                pdf.save(`SOLVIT_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                alert('Failed to generate PDF. Please try again.');
+            } finally {
+                // Reset button
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        };
     </script>
 </body>
 </html>
